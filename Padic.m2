@@ -6,13 +6,13 @@ newPackage("Padic",
 	    Name => "Doug Torrance",
 	    Email => "dtorrance@piedmont.edu",
 	    HomePage => "https://webwork.piedmont.edu/~dtorrance"}},
-    Keywords => {"Algebraic Number Theory"})
+    Keywords => {"Algebraic Number Theory"},
+    PackageImports => {"ForeignFunctions"})
 
 export {
     -- classes
-    "QQp",
     "PadicFieldFamily",
-    "PadicNumber"}
+    }
 
 -- unexported symbols
 protect prime
@@ -101,20 +101,13 @@ padicGetStr = foreignFunction(flint, "padic_get_str", charstar,
 -- p-adic numbers --
 --------------------
 
-QQp = new InexactFieldFamily of InexactNumber
-QQp.synonym = "p-adic number"
-
-------------------------------
--- fields of p-adic numbers --
-------------------------------
-
-PadicFieldFamily = new Type of InexactFieldFamily
+PadicFieldFamily = new Type of RingFamily
 PadicFieldFamily.synonym = "p-adic field family"
 
 expression PadicFieldFamily := kk -> Subscript(QQ, kk.prime)
 net PadicFieldFamily := net @@ expression
 
-PadicNumber = new Type of InexactNumber
+knownPadicFields = new MutableHashTable
 
 -- want to use QQ_p, but Ring_ZZ already exists, so overwrite it
 oldRingSubZZ = lookup(symbol _, Ring, ZZ)
@@ -122,7 +115,9 @@ Ring _ ZZ := (R, p) -> (
     if R =!= QQ then oldRingSubZZ(R, p)
     else (
 	if not isPrime p then error "expected a prime number";
-	new PadicFieldFamily of PadicNumber from hashTable {symbol prime => p}))
+	knownPadicFields#p ??= (
+	    new PadicFieldFamily of Number
+	    from hashTable {symbol prime => p})))
 
 end
 
