@@ -22,43 +22,80 @@ protect prime
 ---------------------
 
 flint = openSharedLibrary "flint"
+
+-- fmpz (flint integer type)
 fmpzInit = foreignFunction(flint, "fmpz_init", void, voidstar)
+fmpzClear = foreignFunction(flint, "fmpz_clear", void, voidstar)
 fmpzSetMpz = foreignFunction(flint, "fmpz_set_mpz", void, {voidstar, mpzT})
+
+toFmpz = x -> (
+    -- typedef slong fmpz;
+    -- typedef fmpz fmpz_t[1];
+    y := getMemory size long;
+    fmpzInit y;
+    registerFinalizer(y, fmpzClear);
+    fmpzSetMpz(y, x);
+    y)
+
+-- fmpq (flint rational type)
+fmpqInit = foreignFunction(flint, "fmpq_init", void, voidstar)
+fmpqClear = foreignFunction(flint, "fmpq_clear", void, voidstar)
+fmpqSetFmpzFrac = foreignFunction(flint, "fmpq_set_fmpz_frac", void,
+    {voidstar, voidstar, voidstar})
+
+toFmpq = x -> (
+    -- typedef struct {
+    --     fmpz num;
+    --     fmpz den;
+    -- } fmpq;
+    y := getMemory(2 * size long);
+    fmpqInit y;
+    registerFinalizer(y, fmpqClear);
+    x _= QQ; -- promote to QQ if needed
+    fmpqSetFmpzFrac(y, toFmpz numerator x, toFmpz denominator x);
+    y)
+
+-- padic_ctx_t
 padicCtxInit = foreignFunction(flint, "padic_ctx_init", void,
     {voidstar, voidstar, long, long, int})
+padicCtxClear = foreignFunction(flint, "padic_ctx_clear", void, voidstar)
+
+newPadicContext = (p, N) -> (
+    -- typedef struct {
+    --     fmpz_t p;
+    --     double pinv;
+    --     fmpz *pow;
+    --     slong min;
+    --     slong max;
+    --     enum padic_print_mode mode;
+    -- } padic_ctx_struct;
+    ctx := getMemory(4 * size long + size double + size int);
+    m := max(0, N - 10);
+    M := max(0, N + 10);
+    padicCtxInit(ctx, toFmpz p, m, M, 1 -* PADIC_SERIES *-);
+    registerFinalizer(ctx, padicCtxClear);
+    ctx)
+
+-- padic_t
 padicInit2 = foreignFunction(flint, "padic_init2", void, {voidstar, long})
-padicSetFmpz = foreignFunction(flint, "padic_set_fmpz", void,
+padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
+padicSetFmpq = foreignFunction(flint, "padic_set_fmpq", void,
     {voidstar, voidstar, voidstar})
+
+newPadic = (x, N, ctx) -> (
+    -- typedef struct {
+    --     fmpz u;
+    --     slong v;
+    --     slong N;
+    -- } padic_struct;
+    y := getMemory(3 * size long);
+    padicInit2(y, N);
+    registerFinalizer(y, padicClear);
+    padicSetFmpq(y, toFmpq x, ctx);
+    y)
+
 padicGetStr = foreignFunction(flint, "padic_get_str", charstar,
     {charstar, voidstar, voidstar})
-
--- typedef struct {
---     fmpz_t p;
---     double pinv;
---     fmpz *pow;
---     slong min;
---     slong max;
---     enum padic_print_mode mode;
--- } padic_ctx_struct;
-
-ctx = getMemory(4 * size long + size double + size int)
-p = getMemory voidstar
-fmpzInit p
-fmpzSetMpz(p, 3)
-padicCtxInit(ctx, p, 0, 100, 1)
-
--- typedef struct {
---     fmpz u;
---     slong v;
---     slong N;
--- } padic_struct;
-
-x = getMemory(3 * size long)
-y = getMemory voidstar
-fmpzInit y
-fmpzSetMpz(y, 3)
-padicSetFmpz(x, y, ctx)
-padicGetStr("", x, ctx)
 
 --------------------
 -- p-adic numbers --
