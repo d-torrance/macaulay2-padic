@@ -138,6 +138,7 @@ PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
 peek'(ZZ, PadicNumber) := lookup(peek', ZZ, HashTable)
 
 knownPadicFields = new MutableHashTable
+knownPadicContexts = new MutableHashTable
 
 -- want to use QQ_p, but Ring_ZZ already exists, so overwrite it
 oldRingSubZZ = lookup(symbol _, Ring, ZZ)
@@ -151,13 +152,23 @@ Ring _ ZZ := (R, p) -> (
 
 new PadicNumber from (ZZ, Number) := (T, N, x) -> (
     x _= QQ; -- promote to QQ if needed
-    ctx := newPadicContext(T.prime, N);
+    ctx := knownPadicContexts#(T.prime, N) ??= newPadicContext(T.prime, N);
     new T from hashTable {
 	symbol context => ctx,
 	symbol value => newPadic(x, N, ctx)})
 new PadicNumber from Number := (T, x) -> new T from (20, x)
 
 PadicFieldFamily Thing := (T, x) -> new T from x
+
+----------------
+-- operations --
+----------------
+
+getContext = (x, y) -> (
+    p := prime x;
+    if p != prime y then error "expected elements of the same field";
+    N := min(precision x, precision y);
+    knownPadicContexts ??= getPadicContext(p, N))
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
