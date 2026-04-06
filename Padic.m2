@@ -7,15 +7,22 @@ newPackage("Padic",
 	    Email => "dtorrance@piedmont.edu",
 	    HomePage => "https://webwork.piedmont.edu/~dtorrance"}},
     Keywords => {"Algebraic Number Theory"},
-    PackageImports => {"ForeignFunctions"})
+    PackageImports => {"ForeignFunctions", "Valuations"})
 
 export {
+    -- methods
+    "prime",
+    "unit",
+
     -- classes
+    "PadicNumber",
     "PadicFieldFamily",
     }
 
+exportFrom(Valuations, "valuation")
+
 -- unexported symbols
-protect prime
+protect context
 
 ---------------------
 -- FLINT interface --
@@ -51,7 +58,6 @@ toFmpq = x -> (
     y := getMemory(2 * size long);
     fmpqInit y;
     registerFinalizer(y, fmpqClear);
-    x _= QQ; -- promote to QQ if needed
     fmpqSetFmpzFrac(y, toFmpz numerator x, toFmpz denominator x);
     y)
 
@@ -82,13 +88,13 @@ padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
 padicSetFmpq = foreignFunction(flint, "padic_set_fmpq", void,
     {voidstar, voidstar, voidstar})
 
+padicStruct = foreignStructType("padic_struct", {
+	"u" => long,
+	"v" => long,
+	"N" => long})
+
 newPadic = (x, N, ctx) -> (
-    -- typedef struct {
-    --     fmpz u;
-    --     slong v;
-    --     slong N;
-    -- } padic_struct;
-    y := getMemory(3 * size long);
+    y := getMemory size padicStruct;
     padicInit2(y, N);
     registerFinalizer(y, padicClear);
     padicSetFmpq(y, toFmpq x, ctx);
@@ -107,6 +113,30 @@ PadicFieldFamily.synonym = "p-adic field family"
 expression PadicFieldFamily := kk -> Subscript(QQ, kk.prime)
 net PadicFieldFamily := net @@ expression
 
+PadicNumber = new Type of Number
+PadicNumber.synonym = "p-adic number"
+
+precision PadicNumber := x -> value (padicStruct * x.value)_"N"
+
+unit = method()
+unit PadicNumber := x -> value (padicStruct * x.value)_"u"
+
+valuation PadicNumber := x -> value (padicStruct * x.value)_"v"
+
+prime = method()
+prime PadicNumber := x -> (class x).prime
+
+numdigits := x -> floor(log(10, x) + 1)
+toString PadicNumber := x -> (
+    (N, v, p) := (precision x, valuation x, prime x);
+    -- from src/padic/get_str.c
+    n := (N - v) * (2 * numdigits p + numdigits max(abs v, abs N) + 5) + 1;
+    value padicGetStr(concatenate(n:"\0"), x.value, x.context))
+
+PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
+
+peek'(ZZ, PadicNumber) := lookup(peek', ZZ, HashTable)
+
 knownPadicFields = new MutableHashTable
 
 -- want to use QQ_p, but Ring_ZZ already exists, so overwrite it
@@ -116,8 +146,22 @@ Ring _ ZZ := (R, p) -> (
     else (
 	if not isPrime p then error "expected a prime number";
 	knownPadicFields#p ??= (
-	    new PadicFieldFamily of Number
+	    new PadicFieldFamily of PadicNumber
 	    from hashTable {symbol prime => p})))
+
+new PadicNumber from (ZZ, Number) := (T, N, x) -> (
+    x _= QQ; -- promote to QQ if needed
+    ctx := newPadicContext(T.prime, N);
+    new T from hashTable {
+	symbol context => ctx,
+	symbol value => newPadic(x, N, ctx)})
+new PadicNumber from Number := (T, x) -> new T from (20, x)
+
+PadicFieldFamily Thing := (T, x) -> new T from x
+
+TEST ///
+assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
+///
 
 end
 
