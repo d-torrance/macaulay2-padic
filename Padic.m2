@@ -49,6 +49,8 @@ fmpqInit = foreignFunction(flint, "fmpq_init", void, voidstar)
 fmpqClear = foreignFunction(flint, "fmpq_clear", void, voidstar)
 fmpqSetFmpzFrac = foreignFunction(flint, "fmpq_set_fmpz_frac", void,
     {voidstar, voidstar, voidstar})
+fmpqGetMpzFrac = foreignFunction(flint, "fmpq_get_mpz_frac", void,
+    {mpzT, mpzT, voidstar})
 
 toFmpq = x -> (
     -- typedef struct {
@@ -60,6 +62,11 @@ toFmpq = x -> (
     registerFinalizer(y, fmpqClear);
     fmpqSetFmpzFrac(y, toFmpz numerator x, toFmpz denominator x);
     y)
+
+fromFmpq = x -> (
+    (a, b) := (mpzT 0, mpzT 1);
+    fmpqGetMpzFrac(a, b, x);
+    value a / value b)
 
 -- padic_ctx_t
 padicCtxInit = foreignFunction(flint, "padic_ctx_init", void,
@@ -86,6 +93,8 @@ newPadicContext = memoize((p, N) -> (
 padicInit2 = foreignFunction(flint, "padic_init2", void, {voidstar, long})
 padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
 padicSetFmpq = foreignFunction(flint, "padic_set_fmpq", void,
+    {voidstar, voidstar, voidstar})
+padicGetFmpq = foreignFunction(flint, "padic_get_fmpq", void,
     {voidstar, voidstar, voidstar})
 
 padicStruct = foreignStructType("padic_struct", {
@@ -215,11 +224,19 @@ PadicNumber / PadicNumber := (x, y) -> (
     z)
 PadicNumber / Number := (x, y) -> x / QQ_(prime x) y
 Number / PadicNumber := (x, y) -> QQ_(prime y) x / y
+
+promote(PadicNumber, QQ) := (x, kk) -> (
+    y := toFmpq(0/1);
+    padicGetFmpq(y, x.value, x.context);
+    fromFmpq y)
+
 PadicNumber == PadicNumber := (x, y) -> (
     prime x == prime y and value padicEqual(x.value, y.value) == 1
     or
-    -- TODO: if primes don't agree, then convert to QQ and compare there
-    false)
+    -- if primes don't agree, then just compare in QQ
+    x_QQ == y_QQ)
+
+PadicNumber == Number := Number == PadicNumber := (x, y) -> x_QQ == y_QQ
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
@@ -230,6 +247,14 @@ assert Equation(QQ_7 3 + QQ_7 2, QQ_7 5)
 assert Equation(QQ_7 3 - QQ_7 2, QQ_7 1)
 assert Equation(QQ_7 3 * QQ_7 2, QQ_7 6)
 assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
+///
+
+TEST ///
+assert Equation(QQ_2 5, QQ_2 5)
+assert Equation(QQ_2 5, QQ_3 5)
+assert Equation(QQ_2 5, 5)
+assert Equation(5, QQ_2 5)
+assert BinaryOperation(symbol ===, (QQ_2 5)_QQ, 5/1)
 ///
 
 end
