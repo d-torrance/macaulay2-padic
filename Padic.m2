@@ -66,21 +66,21 @@ padicCtxInit = foreignFunction(flint, "padic_ctx_init", void,
     {voidstar, voidstar, long, long, int})
 padicCtxClear = foreignFunction(flint, "padic_ctx_clear", void, voidstar)
 
-newPadicContext = (p, N) -> (
-    -- typedef struct {
-    --     fmpz_t p;
-    --     double pinv;
-    --     fmpz *pow;
-    --     slong min;
-    --     slong max;
-    --     enum padic_print_mode mode;
-    -- } padic_ctx_struct;
-    ctx := getMemory(4 * size long + size double + size int);
-    m := max(0, N - 10);
-    M := max(0, N + 10);
-    padicCtxInit(ctx, toFmpz p, m, M, 1 -* PADIC_SERIES *-);
-    registerFinalizer(ctx, padicCtxClear);
-    ctx)
+newPadicContext = memoize((p, N) -> (
+	-- typedef struct {
+	--     fmpz_t p;
+	--     double pinv;
+	--     fmpz *pow;
+	--     slong min;
+	--     slong max;
+	--     enum padic_print_mode mode;
+	-- } padic_ctx_struct;
+	ctx := getMemory(4 * size long + size double + size int);
+	m := max(0, N - 10);
+	M := max(0, N + 10);
+	padicCtxInit(ctx, toFmpz p, m, M, 1 -* PADIC_SERIES *-);
+	registerFinalizer(ctx, padicCtxClear);
+	ctx))
 
 -- padic_t
 padicInit2 = foreignFunction(flint, "padic_init2", void, {voidstar, long})
@@ -93,15 +93,17 @@ padicStruct = foreignStructType("padic_struct", {
 	"v" => long,
 	"N" => long})
 
-newPadic = (x, N, ctx) -> (
+newPadic = N -> (
     y := getMemory size padicStruct;
     padicInit2(y, N);
     registerFinalizer(y, padicClear);
-    padicSetFmpq(y, toFmpq x, ctx);
     y)
 
 padicGetStr = foreignFunction(flint, "padic_get_str", charstar,
     {charstar, voidstar, voidstar})
+
+padicAdd = foreignFunction(flint, "padic_add", void,
+    {voidstar, voidstar, voidstar, voidstar})
 
 --------------------
 -- p-adic numbers --
@@ -138,7 +140,6 @@ PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
 peek'(ZZ, PadicNumber) := lookup(peek', ZZ, HashTable)
 
 knownPadicFields = new MutableHashTable
-knownPadicContexts = new MutableHashTable
 
 -- want to use QQ_p, but Ring_ZZ already exists, so overwrite it
 oldRingSubZZ = lookup(symbol _, Ring, ZZ)
@@ -150,12 +151,16 @@ Ring _ ZZ := (R, p) -> (
 	    new PadicFieldFamily of PadicNumber
 	    from hashTable {symbol prime => p})))
 
-new PadicNumber from (ZZ, Number) := (T, N, x) -> (
-    x _= QQ; -- promote to QQ if needed
-    ctx := knownPadicContexts#(T.prime, N) ??= newPadicContext(T.prime, N);
+new PadicNumber from (voidstar, voidstar) := (T, ctx, val) -> (
     new T from hashTable {
 	symbol context => ctx,
-	symbol value => newPadic(x, N, ctx)})
+	symbol value => val})
+new PadicNumber from (ZZ, Number) := (T, N, x) -> (
+    x _= QQ; -- promote to QQ if needed
+    ctx := newPadicContext(T.prime, N);
+    y := newPadic N;
+    padicSetFmpq(y, toFmpq x, ctx);
+    new T from (ctx, y))
 new PadicNumber from Number := (T, x) -> new T from (20, x)
 
 PadicFieldFamily Thing := (T, x) -> new T from x
@@ -164,11 +169,18 @@ PadicFieldFamily Thing := (T, x) -> new T from x
 -- operations --
 ----------------
 
-getContext = (x, y) -> (
+combinePadics = (x, y) -> (
     p := prime x;
     if p != prime y then error "expected elements of the same field";
     N := min(precision x, precision y);
-    knownPadicContexts ??= getPadicContext(p, N))
+    ctx := newPadicContext(p, N);
+    val := newPadic N;
+    QQ_p(ctx, val))
+
+PadicNumber + PadicNumber := (x, y) -> (
+    z := combinePadics(x, y);
+    padicAdd(z.value, x.value, y.value, z.context);
+    z)
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
