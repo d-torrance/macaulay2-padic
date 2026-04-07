@@ -105,6 +105,17 @@ padicGetStr = foreignFunction(flint, "padic_get_str", charstar,
 padicAdd = foreignFunction(flint, "padic_add", void,
     {voidstar, voidstar, voidstar, voidstar})
 
+padicSub = foreignFunction(flint, "padic_sub", void,
+    {voidstar, voidstar, voidstar, voidstar})
+
+padicMul = foreignFunction(flint, "padic_mul", void,
+    {voidstar, voidstar, voidstar, voidstar})
+
+padicDiv = foreignFunction(flint, "padic_div", void,
+    {voidstar, voidstar, voidstar, voidstar})
+
+padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
+
 --------------------
 -- p-adic numbers --
 --------------------
@@ -181,9 +192,44 @@ PadicNumber + PadicNumber := (x, y) -> (
     z := combinePadics(x, y);
     padicAdd(z.value, x.value, y.value, z.context);
     z)
+PadicNumber + Number := (x, y) -> x + QQ_(prime x) y
+Number + PadicNumber := (x, y) -> QQ_(prime y) x + y
+
+PadicNumber - PadicNumber := (x, y) -> (
+    z := combinePadics(x, y);
+    padicSub(z.value, x.value, y.value, z.context);
+    z)
+PadicNumber - Number := (x, y) -> x - QQ_(prime x) y
+Number - PadicNumber := (x, y) -> QQ_(prime y) x - y
+
+PadicNumber * PadicNumber := (x, y) -> (
+    z := combinePadics(x, y);
+    padicMul(z.value, x.value, y.value, z.context);
+    z)
+PadicNumber * Number := (x, y) -> x * QQ_(prime x) y
+Number * PadicNumber := (x, y) -> QQ_(prime y) x * y
+
+PadicNumber / PadicNumber := (x, y) -> (
+    z := combinePadics(x, y);
+    padicDiv(z.value, x.value, y.value, z.context);
+    z)
+PadicNumber / Number := (x, y) -> x / QQ_(prime x) y
+Number / PadicNumber := (x, y) -> QQ_(prime y) x / y
+PadicNumber == PadicNumber := (x, y) -> (
+    prime x == prime y and value padicEqual(x.value, y.value) == 1
+    or
+    -- TODO: if primes don't agree, then convert to QQ and compare there
+    false)
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
+///
+
+TEST ///
+assert Equation(QQ_7 3 + QQ_7 2, QQ_7 5)
+assert Equation(QQ_7 3 - QQ_7 2, QQ_7 1)
+assert Equation(QQ_7 3 * QQ_7 2, QQ_7 6)
+assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
 ///
 
 end
