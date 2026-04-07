@@ -126,7 +126,7 @@ valuation PadicNumber := x -> value (padicStruct * x.value)_"v"
 prime = method()
 prime PadicNumber := x -> (class x).prime
 
-numdigits := x -> floor(log(10, x) + 1)
+numdigits := x -> floor log(10, x) + 1
 toString PadicNumber := x -> (
     (N, v, p) := (precision x, valuation x, prime x);
     -- from src/padic/get_str.c
