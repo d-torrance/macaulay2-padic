@@ -132,6 +132,9 @@ padicMul = foreignFunction(flint, "padic_mul", void,
 padicDiv = foreignFunction(flint, "padic_div", void,
     {voidstar, voidstar, voidstar, voidstar})
 
+padicShift = foreignFunction(flint, "padic_shift", void,
+    {voidstar, voidstar, long, voidstar})
+
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
 
 --------------------
@@ -234,6 +237,13 @@ PadicNumber / PadicNumber := (x, y) -> (
 PadicNumber / Number := (x, y) -> x / QQ_(prime x) y
 Number / PadicNumber := (x, y) -> QQ_(prime y) x / y
 
+PadicNumber << ZZ := (x, y) -> (
+    z := newPadic precision x;
+    padicShift(z, x.value, y, x.context);
+    QQ_(prime x)(x.context, z))
+
+(PadicNumber >> ZZ) := (x, y) -> x << -y
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
@@ -256,6 +266,8 @@ assert Equation(QQ_7 3 + QQ_7 2, QQ_7 5)
 assert Equation(QQ_7 3 - QQ_7 2, QQ_7 1)
 assert Equation(QQ_7 3 * QQ_7 2, QQ_7 6)
 assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
+assert Equation(QQ_7 3 << 2, QQ_7(3 * 49))
+assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
 ///
 
 TEST ///
