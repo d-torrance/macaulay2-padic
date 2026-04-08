@@ -104,6 +104,8 @@ padicGetVal = foreignFunction(flint, "padic_get_val", long, voidstar)
 padicGetPrec = foreignFunction(flint, "padic_get_prec", long, voidstar)
 padicSetFmpq = foreignFunction(flint, "padic_set_fmpq", void,
     {voidstar, voidstar, voidstar})
+padicGetFmpz = foreignFunction(flint, "padic_get_fmpz", void,
+    {voidstar, voidstar, voidstar})
 padicGetFmpq = foreignFunction(flint, "padic_get_fmpq", void,
     {voidstar, voidstar, voidstar})
 
@@ -298,10 +300,20 @@ teichmuller PadicNumber := x -> (
     padicTeichmuller(y, x.value, x.context);
     QQ_(prime x)(x.context, y))
 
+promote(PadicNumber, ZZ) := (x, kk) -> (
+    if valuation x < 0 then error("expected a ", prime x, "-adic integer");
+    y := toFmpz 0;
+    padicGetFmpz(y, x.value, x.context);
+    fromFmpz y)
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
     fromFmpq y)
+
+promote(PadicNumber, InexactNumber)  :=
+promote(PadicNumber, InexactNumber') :=
+promote(PadicNumber, RingElement)    := (x, kk) -> promote(x_QQ, kk)
 
 PadicNumber == PadicNumber := (x, y) -> (
     prime x == prime y and value padicEqual(x.value, y.value) == 1
@@ -335,7 +347,13 @@ assert Equation(QQ_2 5, QQ_2 5)
 assert Equation(QQ_2 5, QQ_3 5)
 assert Equation(QQ_2 5, 5)
 assert Equation(5, QQ_2 5)
+assert BinaryOperation(symbol ===, (QQ_2 5)_ZZ, 5)
 assert BinaryOperation(symbol ===, (QQ_2 5)_QQ, 5/1)
+assert BinaryOperation(symbol ===, (QQ_2 5)_RR, 5.0)
+assert BinaryOperation(symbol ===, (QQ_2 5)_CC, 5 + 0*ii)
+assert BinaryOperation(symbol ===, (QQ_2 5)_RRi, interval 5)
+R = QQ[x]
+assert BinaryOperation(symbol ===, (QQ_2 5)_R, 5_R)
 ///
 
 end
