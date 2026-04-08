@@ -141,6 +141,9 @@ padicInv = foreignFunction(flint, "padic_inv", void,
 padicSqrt = foreignFunction(flint, "padic_sqrt", int,
     {voidstar, voidstar, voidstar})
 
+padicPowSi = foreignFunction(flint, "padic_pow_si", void,
+    {voidstar, voidstar, long, voidstar})
+
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
 
 --------------------
@@ -261,6 +264,11 @@ sqrt PadicNumber := x -> (
     if r == 1 then QQ_(prime x)(x.context, y)
     else error("not a ", prime x, "-adic square"))
 
+PadicNumber^ZZ := (x, y) -> (
+    z := newPadic precision x;
+    padicPowSi(z, x.value, y, x.context);
+    QQ_(prime x)(x.context, z))
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
@@ -287,6 +295,7 @@ assert Equation(QQ_7 3 << 2, QQ_7(3 * 49))
 assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
 assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
 assert Equation(sqrt QQ_7 4, QQ_7 2)
+assert Equation((QQ_7 3)^2, QQ_7 9)
 ///
 
 TEST ///
