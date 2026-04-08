@@ -144,6 +144,12 @@ padicSqrt = foreignFunction(flint, "padic_sqrt", int,
 padicPowSi = foreignFunction(flint, "padic_pow_si", void,
     {voidstar, voidstar, long, voidstar})
 
+padicExp = foreignFunction(flint, "padic_exp", int,
+    {voidstar, voidstar, voidstar})
+
+padicLog = foreignFunction(flint, "padic_log", int,
+    {voidstar, voidstar, voidstar})
+
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
 
 --------------------
@@ -269,6 +275,18 @@ PadicNumber^ZZ := (x, y) -> (
     padicPowSi(z, x.value, y, x.context);
     QQ_(prime x)(x.context, z))
 
+exp PadicNumber := x -> (
+    y := newPadic precision x;
+    r := value padicExp(y, x.value, x.context);
+    if r == 1 then QQ_(prime x)(x.context, y)
+    else error(prime x, "-adic exponential function does not converge"))
+
+log PadicNumber := x -> (
+    y := newPadic precision x;
+    r := value padicLog(y, x.value, x.context);
+    if r == 1 then QQ_(prime x)(x.context, y)
+    else error(prime x, "-adic logarithm function does not converge"))
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
@@ -296,6 +314,7 @@ assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
 assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
 assert Equation(sqrt QQ_7 4, QQ_7 2)
 assert Equation((QQ_7 3)^2, QQ_7 9)
+assert Equation(log exp QQ_7 7, QQ_7 7)
 ///
 
 TEST ///
