@@ -138,6 +138,9 @@ padicShift = foreignFunction(flint, "padic_shift", void,
 padicInv = foreignFunction(flint, "padic_inv", void,
     {voidstar, voidstar, voidstar})
 
+padicSqrt = foreignFunction(flint, "padic_sqrt", int,
+    {voidstar, voidstar, voidstar})
+
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
 
 --------------------
@@ -252,6 +255,12 @@ inverse PadicNumber := x -> (
     padicInv(y, x.value, x.context);
     QQ_(prime x)(x.context, y))
 
+sqrt PadicNumber := x -> (
+    y := newPadic precision x;
+    r := value padicSqrt(y, x.value, x.context);
+    if r == 1 then QQ_(prime x)(x.context, y)
+    else error("not a ", prime x, "-adic square"))
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
@@ -277,6 +286,7 @@ assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
 assert Equation(QQ_7 3 << 2, QQ_7(3 * 49))
 assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
 assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
+assert Equation(sqrt QQ_7 4, QQ_7 2)
 ///
 
 TEST ///
