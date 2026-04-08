@@ -12,6 +12,7 @@ newPackage("Padic",
 export {
     -- methods
     "prime",
+    "teichmuller",
     "unit",
 
     -- classes
@@ -148,6 +149,9 @@ padicExp = foreignFunction(flint, "padic_exp", int,
     {voidstar, voidstar, voidstar})
 
 padicLog = foreignFunction(flint, "padic_log", int,
+    {voidstar, voidstar, voidstar})
+
+padicTeichmuller = foreignFunction(flint, "padic_teichmuller", int,
     {voidstar, voidstar, voidstar})
 
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
@@ -287,6 +291,13 @@ log PadicNumber := x -> (
     if r == 1 then QQ_(prime x)(x.context, y)
     else error(prime x, "-adic logarithm function does not converge"))
 
+teichmuller = method()
+teichmuller PadicNumber := x -> (
+    if valuation x < 0 then error("expected a ", prime x, "-adic integer");
+    y := newPadic precision x;
+    padicTeichmuller(y, x.value, x.context);
+    QQ_(prime x)(x.context, y))
+
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.value, x.context);
@@ -315,6 +326,8 @@ assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
 assert Equation(sqrt QQ_7 4, QQ_7 2)
 assert Equation((QQ_7 3)^2, QQ_7 9)
 assert Equation(log exp QQ_7 7, QQ_7 7)
+t = teichmuller QQ_7 3
+assert Equation(t^7 - t, 0)
 ///
 
 TEST ///
