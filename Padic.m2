@@ -34,6 +34,7 @@ flint = openSharedLibrary "flint"
 fmpzInit = foreignFunction(flint, "fmpz_init", void, voidstar)
 fmpzClear = foreignFunction(flint, "fmpz_clear", void, voidstar)
 fmpzSetMpz = foreignFunction(flint, "fmpz_set_mpz", void, {voidstar, mpzT})
+fmpzGetMpz = foreignFunction(flint, "fmpz_get_mpz", void, {mpzT, voidstar})
 
 toFmpz = x -> (
     -- typedef slong fmpz;
@@ -43,6 +44,11 @@ toFmpz = x -> (
     registerFinalizer(y, fmpzClear);
     fmpzSetMpz(y, x);
     y)
+
+fromFmpz = x -> (
+    y := mpzT 0;
+    fmpzGetMpz(y, x);
+    value y)
 
 -- fmpq (flint rational type)
 fmpqInit = foreignFunction(flint, "fmpq_init", void, voidstar)
@@ -92,18 +98,21 @@ newPadicContext = memoize((p, N) -> (
 -- padic_t
 padicInit2 = foreignFunction(flint, "padic_init2", void, {voidstar, long})
 padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
+padicUnit = foreignFunction(flint, "padic_unit", voidstar, voidstar)
+padicGetVal = foreignFunction(flint, "padic_get_val", long, voidstar)
+padicGetPrec = foreignFunction(flint, "padic_get_prec", long, voidstar)
 padicSetFmpq = foreignFunction(flint, "padic_set_fmpq", void,
     {voidstar, voidstar, voidstar})
 padicGetFmpq = foreignFunction(flint, "padic_get_fmpq", void,
     {voidstar, voidstar, voidstar})
 
-padicStruct = foreignStructType("padic_struct", {
-	"u" => long,
-	"v" => long,
-	"N" => long})
-
 newPadic = N -> (
-    y := getMemory size padicStruct;
+    -- typedef struct {
+    --  fmpz u;
+    --  slong v;
+    --  slong N;
+    -- } padic_struct;
+    y := getMemory(3 * size long);
     padicInit2(y, N);
     registerFinalizer(y, padicClear);
     y)
@@ -138,12 +147,12 @@ net PadicFieldFamily := net @@ expression
 PadicNumber = new Type of Number
 PadicNumber.synonym = "p-adic number"
 
-precision PadicNumber := x -> value (padicStruct * x.value)_"N"
+precision PadicNumber := x -> value padicGetPrec x.value
 
 unit = method()
-unit PadicNumber := x -> value (padicStruct * x.value)_"u"
+unit PadicNumber := x -> fromFmpz padicUnit x.value
 
-valuation PadicNumber := x -> value (padicStruct * x.value)_"v"
+valuation PadicNumber := x -> value padicGetVal x.value
 
 prime = method()
 prime PadicNumber := x -> (class x).prime
