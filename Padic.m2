@@ -171,12 +171,12 @@ net PadicFieldFamily := net @@ expression
 PadicNumber = new Type of Number
 PadicNumber.synonym = "p-adic number"
 
-precision PadicNumber := x -> value padicGetPrec x.value
+precision PadicNumber := x -> value padicGetPrec x.number
 
 unit = method()
-unit PadicNumber := x -> fromFmpz padicUnit x.value
+unit PadicNumber := x -> fromFmpz padicUnit x.number
 
-valuation PadicNumber := x -> value padicGetVal x.value
+valuation PadicNumber := x -> value padicGetVal x.number
 
 prime = method()
 prime PadicNumber := x -> (class x).prime
@@ -186,7 +186,7 @@ toString PadicNumber := x -> (
     (N, v, p) := (precision x, valuation x, prime x);
     -- from src/padic/get_str.c
     n := (N - v) * (2 * numdigits p + numdigits max(abs v, abs N) + 5) + 1;
-    value padicGetStr(concatenate(n:"\0"), x.value, x.context))
+    value padicGetStr(concatenate(n:"\0"), x.number, x.context))
 
 PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
 
@@ -204,10 +204,10 @@ Ring _ ZZ := (R, p) -> (
 	    new PadicFieldFamily of PadicNumber
 	    from hashTable {symbol prime => p})))
 
-new PadicNumber from (voidstar, voidstar) := (T, ctx, val) -> (
+new PadicNumber from (voidstar, voidstar) := (T, ctx, num) -> (
     new T from hashTable {
 	symbol context => ctx,
-	symbol value => val})
+	symbol number => num})
 new PadicNumber from (ZZ, Number) := (T, N, x) -> (
     x _= QQ; -- promote to QQ if needed
     ctx := newPadicContext(T.prime, N);
@@ -232,64 +232,64 @@ combinePadics = (x, y) -> (
 
 PadicNumber + PadicNumber := (x, y) -> (
     z := combinePadics(x, y);
-    padicAdd(z.value, x.value, y.value, z.context);
+    padicAdd(z.number, x.number, y.number, z.context);
     z)
 PadicNumber + Number := (x, y) -> x + QQ_(prime x) y
 Number + PadicNumber := (x, y) -> QQ_(prime y) x + y
 
 PadicNumber - PadicNumber := (x, y) -> (
     z := combinePadics(x, y);
-    padicSub(z.value, x.value, y.value, z.context);
+    padicSub(z.number, x.number, y.number, z.context);
     z)
 PadicNumber - Number := (x, y) -> x - QQ_(prime x) y
 Number - PadicNumber := (x, y) -> QQ_(prime y) x - y
 
 PadicNumber * PadicNumber := (x, y) -> (
     z := combinePadics(x, y);
-    padicMul(z.value, x.value, y.value, z.context);
+    padicMul(z.number, x.number, y.number, z.context);
     z)
 PadicNumber * Number := (x, y) -> x * QQ_(prime x) y
 Number * PadicNumber := (x, y) -> QQ_(prime y) x * y
 
 PadicNumber / PadicNumber := (x, y) -> (
     z := combinePadics(x, y);
-    padicDiv(z.value, x.value, y.value, z.context);
+    padicDiv(z.number, x.number, y.number, z.context);
     z)
 PadicNumber / Number := (x, y) -> x / QQ_(prime x) y
 Number / PadicNumber := (x, y) -> QQ_(prime y) x / y
 
 PadicNumber << ZZ := (x, y) -> (
     z := newPadic precision x;
-    padicShift(z, x.value, y, x.context);
+    padicShift(z, x.number, y, x.context);
     QQ_(prime x)(x.context, z))
 
 (PadicNumber >> ZZ) := (x, y) -> x << -y
 
 inverse PadicNumber := x -> (
     y := newPadic precision x;
-    padicInv(y, x.value, x.context);
+    padicInv(y, x.number, x.context);
     QQ_(prime x)(x.context, y))
 
 sqrt PadicNumber := x -> (
     y := newPadic precision x;
-    r := value padicSqrt(y, x.value, x.context);
+    r := value padicSqrt(y, x.number, x.context);
     if r == 1 then QQ_(prime x)(x.context, y)
     else error("not a ", prime x, "-adic square"))
 
 PadicNumber^ZZ := (x, y) -> (
     z := newPadic precision x;
-    padicPowSi(z, x.value, y, x.context);
+    padicPowSi(z, x.number, y, x.context);
     QQ_(prime x)(x.context, z))
 
 exp PadicNumber := x -> (
     y := newPadic precision x;
-    r := value padicExp(y, x.value, x.context);
+    r := value padicExp(y, x.number, x.context);
     if r == 1 then QQ_(prime x)(x.context, y)
     else error(prime x, "-adic exponential function does not converge"))
 
 log PadicNumber := x -> (
     y := newPadic precision x;
-    r := value padicLog(y, x.value, x.context);
+    r := value padicLog(y, x.number, x.context);
     if r == 1 then QQ_(prime x)(x.context, y)
     else error(prime x, "-adic logarithm function does not converge"))
 
@@ -297,18 +297,18 @@ teichmuller = method()
 teichmuller PadicNumber := x -> (
     if valuation x < 0 then error("expected a ", prime x, "-adic integer");
     y := newPadic precision x;
-    padicTeichmuller(y, x.value, x.context);
+    padicTeichmuller(y, x.number, x.context);
     QQ_(prime x)(x.context, y))
 
 promote(PadicNumber, ZZ) := (x, kk) -> (
     if valuation x < 0 then error("expected a ", prime x, "-adic integer");
     y := toFmpz 0;
-    padicGetFmpz(y, x.value, x.context);
+    padicGetFmpz(y, x.number, x.context);
     fromFmpz y)
 
 promote(PadicNumber, QQ) := (x, kk) -> (
     y := toFmpq(0/1);
-    padicGetFmpq(y, x.value, x.context);
+    padicGetFmpq(y, x.number, x.context);
     fromFmpq y)
 
 promote(PadicNumber, InexactNumber)  :=
@@ -316,7 +316,7 @@ promote(PadicNumber, InexactNumber') :=
 promote(PadicNumber, RingElement)    := (x, kk) -> promote(x_QQ, kk)
 
 PadicNumber == PadicNumber := (x, y) -> (
-    prime x == prime y and value padicEqual(x.value, y.value) == 1
+    prime x == prime y and value padicEqual(x.number, y.number) == 1
     or
     -- if primes don't agree, then just compare in QQ
     x_QQ == y_QQ)
