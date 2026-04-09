@@ -138,6 +138,9 @@ padicDiv = foreignFunction(flint, "padic_div", void,
 padicShift = foreignFunction(flint, "padic_shift", void,
     {voidstar, voidstar, long, voidstar})
 
+padicNeg = foreignFunction(flint, "padic_neg", void,
+    {voidstar, voidstar, voidstar})
+
 padicInv = foreignFunction(flint, "padic_inv", void,
     {voidstar, voidstar, voidstar})
 
@@ -270,6 +273,13 @@ PadicNumber << ZZ := (x, y) -> (
 
 (PadicNumber >> ZZ) := (x, y) -> x << -y
 
+-PadicNumber := x -> (
+    y := newPadic precision x;
+    padicNeg(y, x.number, x.context);
+    QQ_(prime x)(x.context, y))
+
++PadicNumber := identity
+
 inverse PadicNumber := x -> (
     if x == 0 then error "division by zero";
     y := newPadic precision x;
@@ -346,6 +356,8 @@ assert Equation(QQ_7 3 * QQ_7 2, QQ_7 6)
 assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
 assert Equation(QQ_7 3 << 2, QQ_7(3 * 49))
 assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
+assert Equation(-QQ_7 3 + QQ_7 3, 0)
+assert Equation(+QQ_7 3, QQ_7 3)
 assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
 assert Equation(sqrt QQ_7 4, QQ_7 2)
 assert Equation((QQ_7 3)^2, QQ_7 9)
