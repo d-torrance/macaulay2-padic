@@ -158,6 +158,8 @@ padicTeichmuller = foreignFunction(flint, "padic_teichmuller", int,
 
 padicEqual = foreignFunction(flint, "padic_equal", int, {voidstar, voidstar})
 
+padicIsZero = foreignFunction(flint, "padic_is_zero", int, voidstar)
+
 --------------------
 -- p-adic numbers --
 --------------------
@@ -254,6 +256,7 @@ PadicNumber * Number := (x, y) -> x * QQ_(prime x) y
 Number * PadicNumber := (x, y) -> QQ_(prime y) x * y
 
 PadicNumber / PadicNumber := (x, y) -> (
+    if y == 0 then error "division by zero";
     z := combinePadics(x, y);
     padicDiv(z.number, x.number, y.number, z.context);
     z)
@@ -268,6 +271,7 @@ PadicNumber << ZZ := (x, y) -> (
 (PadicNumber >> ZZ) := (x, y) -> x << -y
 
 inverse PadicNumber := x -> (
+    if x == 0 then error "division by zero";
     y := newPadic precision x;
     padicInv(y, x.number, x.context);
     QQ_(prime x)(x.context, y))
@@ -326,8 +330,10 @@ PadicNumber == PadicNumber := (x, y) -> (
     -- if primes don't agree, then just compare in QQ
     x^QQ == y^QQ)
 
-PadicNumber == Number := (x, y) -> x^QQ == y
-Number == PadicNumber := (x, y) -> x == y^QQ
+PadicNumber == Number := (x, y) -> (
+    if y == 0 then value padicIsZero x.number == 1
+    else x^QQ == y)
+Number == PadicNumber := (x, y) -> y == x
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
