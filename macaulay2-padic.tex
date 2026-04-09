@@ -22,6 +22,7 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{cleveref}
 
 \newcommand{\QQ}{\mathbb Q}
 \newcommand{\ZZ}{\mathbb Z}
@@ -47,7 +48,7 @@
 %
 \begin{abstract}
   Macaulay2 is a computer algebra platform widely used by researchers in algebraic geometry and commutative algebra. Using the ForeignFunctions package, it is possible to make calls from Macaulay2 to dynamic libraries such as FLINT. We demonstrate this by introducing a new Macaulay2 package implementing p-adic numbers using FLINT via this interface. We discuss implementation details such as memory allocation, interaction with Macaulay2’s garbage collector, and object-oriented design decisions that mirror the existing implementations of the real and complex number fields in Macaulay2.
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Macaulay2  \and FLINT \and foreign function interface \and $p$-adic numbers}
 \end{abstract}
 %
 %
@@ -56,13 +57,22 @@
 
 \section{A review of $p$-adic numbers}
 
-Suppose $p$ is a prime number.  The field of \textit{$p$-adic numbers} $\QQ_p$ is the set of all formal Laurent series
-\begin{equation*}
-  \sum_{n\geq n_0} a_n p^n,
-\end{equation*}
-where $n_0\in\ZZ$ and $a_n\in\{0,\ldots,p-1\}$, equipped with the usual addition and multiplication.
+We open with a crash course on $p$-adic numbers.  The reader is encouraged to reference a textbook such as \cite{gouvea} for more information.
 
-** Introduce other basics as needed. **
+Suppose $p$ is a prime number.  The field of \textit{$p$-adic numbers} $\QQ_p$ is a set whose elements may be expressed uniquely as formal Laurent series
+\begin{equation}\label{p-adic expansion}
+  \sum_{n=\nu}^\infty a_n p^n = a_\nu p^\nu + a_{\nu + 1}p^{\nu + 1} + \cdots,
+\end{equation}
+where $\nu\in\ZZ$ and $a_n\in\{0,\ldots,p-1\}$, together with the usual operations of addition and multiplication in base $p$, but noting that carrying may continue indefinitely.  An enlightening exercise is to verify that $-1 = \sum\limits_{n=0}^\infty(p - 1)\cdot p^n$.
+
+
+For a given $x\in\QQ_p$, its \textit{$p$-adic valuation}, denoted $\nu_p(x)$, is the smallest nonzero exponent that appears in the expansion given in \Cref{p-adic expansion}, e.g., $\nu_3(1\cdot 3^{-2} + 2\cdot 3^{-1})=-2$.  In particular, $\nu_p(0) = \infty$.
+
+The set of all $x\in\QQ_p$ with $\nu_p(x)\geq 0$ forms a ring, known as the \textit{$p$-adic integers} and denoted $\ZZ_p$.  Furthermore, the multiplicative subgroup $\ZZ_p^\times$ of the units of $\ZZ_p$ is precisely the $u\in\QQ_p$ for which $\nu_p(u) = 0$.  It follows that for any $x\in\QQ_p$ with $\nu_p(x)=\nu$,
+\begin{equation}\label{in terms of unit}
+  x = \sum_{n=\nu}^\infty a_n p^n = \left(\sum_{n=0}^\infty a_{n + \nu}p^n\right)p^\nu = up^\nu,
+\end{equation}
+where $u=\sum\limits_{n=0}^\infty a_{n + \nu}p^n\in\ZZ_p^\times$.
 
 \begin{credits}
 \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
@@ -86,27 +96,7 @@ Company X and owns stock in Company Y. Author C is a member of committee Z.
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
-% \bibliographystyle{splncs04}
-% \bibliography{mybibliography}
-%
-\begin{thebibliography}{8}
-\bibitem{ref_article1}
-Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
+\bibliographystyle{splncs04}
+\bibliography{macaulay2-padic}
 
-\bibitem{ref_lncs1}
-Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-Springer, Heidelberg (2016). \doi{10.10007/1234567890}
-
-\bibitem{ref_book1}
-Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-Location (1999)
-
-\bibitem{ref_proc1}
-Author, A.-B.: Contribution title. In: 9th International Proceedings
-on Proceedings, pp. 1--2. Publisher, Location (2010)
-
-\bibitem{ref_url1}
-LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
-\end{thebibliography}
 \end{document}
