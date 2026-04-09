@@ -181,7 +181,9 @@ precision PadicNumber := x -> value padicGetPrec x.number
 unit = method()
 unit PadicNumber := x -> fromFmpz padicUnit x.number
 
-valuation PadicNumber := x -> value padicGetVal x.number
+valuation PadicNumber := x -> (
+    if x == 0 then infinity
+    else value padicGetVal x.number)
 
 prime = method()
 prime PadicNumber := x -> (class x).prime
@@ -347,6 +349,13 @@ Number == PadicNumber := (x, y) -> y == x
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
+///
+
+TEST ///
+assert Equation(valuation QQ_7 49, 2)
+assert Equation(valuation QQ_7 0, infinity)
+assert Equation(unit QQ_7 49, 1)
+assert Equation(precision QQ_7 49, 20)
 ///
 
 TEST ///
