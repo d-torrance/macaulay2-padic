@@ -215,6 +215,8 @@ new PadicNumber from (ZZ, Number) := (T, N, x) -> (
     padicSetFmpq(y, toFmpq x, ctx);
     new T from (ctx, y))
 new PadicNumber from Number := (T, x) -> new T from (20, x)
+new PadicNumber from Constant := (T, x) -> new T from numeric x
+new PadicNumber from (ZZ, Constant) := (T, N, x) -> new T from (N, numeric x)
 
 PadicFieldFamily Thing := (T, x) -> new T from x
 
