@@ -209,7 +209,7 @@ new PadicNumber from (voidstar, voidstar) := (T, ctx, num) -> (
 	symbol context => ctx,
 	symbol number => num})
 new PadicNumber from (ZZ, Number) := (T, N, x) -> (
-    x _= QQ; -- promote to QQ if needed
+    try x _= QQ else x ^= QQ; -- promote/lift to QQ if needed
     ctx := newPadicContext(T.prime, N);
     y := newPadic N;
     padicSetFmpq(y, toFmpq x, ctx);
@@ -302,28 +302,32 @@ teichmuller PadicNumber := x -> (
     padicTeichmuller(y, x.number, x.context);
     QQ_(prime x)(x.context, y))
 
-promote(PadicNumber, ZZ) := (x, kk) -> (
+lift(PadicNumber, ZZ) := o -> (x, kk) -> (
     if valuation x < 0 then error("expected a ", prime x, "-adic integer");
     y := toFmpz 0;
     padicGetFmpz(y, x.number, x.context);
     fromFmpz y)
 
-promote(PadicNumber, QQ) := (x, kk) -> (
+lift(PadicNumber, QQ) := o -> (x, kk) -> (
     y := toFmpq(0/1);
     padicGetFmpq(y, x.number, x.context);
     fromFmpq y)
 
-promote(PadicNumber, InexactNumber)  :=
-promote(PadicNumber, InexactNumber') :=
-promote(PadicNumber, RingElement)    := (x, kk) -> promote(x_QQ, kk)
+numeric PadicNumber := x -> numeric x^QQ
+numeric(ZZ, PadicNumber) := (prec, x) -> numeric(prec, x^QQ)
+interval PadicNumber := o -> x -> interval(x^QQ, o)
+interval(PadicNumber, PadicNumber) := o -> (x, y) -> interval(x^QQ, y^QQ, o)
+interval(PadicNumber, Number) := o -> (x, y) -> interval(x^QQ, y, o)
+interval(Number, PadicNumber) := o -> (x, y) -> interval(x, y^QQ, o)
 
 PadicNumber == PadicNumber := (x, y) -> (
     prime x == prime y and value padicEqual(x.number, y.number) == 1
     or
     -- if primes don't agree, then just compare in QQ
-    x_QQ == y_QQ)
+    x^QQ == y^QQ)
 
-PadicNumber == Number := Number == PadicNumber := (x, y) -> x_QQ == y_QQ
+PadicNumber == Number := (x, y) -> x^QQ == y
+Number == PadicNumber := (x, y) -> x == y^QQ
 
 TEST ///
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
@@ -349,13 +353,15 @@ assert Equation(QQ_2 5, QQ_2 5)
 assert Equation(QQ_2 5, QQ_3 5)
 assert Equation(QQ_2 5, 5)
 assert Equation(5, QQ_2 5)
-assert BinaryOperation(symbol ===, (QQ_2 5)_ZZ, 5)
-assert BinaryOperation(symbol ===, (QQ_2 5)_QQ, 5/1)
-assert BinaryOperation(symbol ===, (QQ_2 5)_RR, 5.0)
-assert BinaryOperation(symbol ===, (QQ_2 5)_CC, 5 + 0*ii)
-assert BinaryOperation(symbol ===, (QQ_2 5)_RRi, interval 5)
-R = QQ[x]
-assert BinaryOperation(symbol ===, (QQ_2 5)_R, 5_R)
+assert BinaryOperation(symbol ===, (QQ_2 5)^ZZ, 5)
+assert BinaryOperation(symbol ===, (QQ_2 5)^QQ, 5/1)
+assert BinaryOperation(symbol ===, numeric QQ_2 5, 5.0)
+assert BinaryOperation(symbol ===, numeric(100, QQ_2 5), 5p100)
+assert BinaryOperation(symbol ===, interval QQ_2 5, interval 5)
+assert BinaryOperation(symbol ===, interval(QQ_2 5, Precision => 100), interval 5p100)
+assert BinaryOperation(symbol ===, interval(QQ_2 5, QQ_2 6), interval(5, 6))
+assert BinaryOperation(symbol ===, interval(QQ_2 5, 6), interval(5, 6))
+assert BinaryOperation(symbol ===, interval(5, QQ_2 6), interval(5, 6))
 ///
 
 end
