@@ -282,6 +282,8 @@ PadicNumber << ZZ := (x, y) -> (
 
 +PadicNumber := identity
 
+abs PadicNumber := x -> (prime x)^(-valuation x)
+
 inverse PadicNumber := x -> (
     if x == 0 then error "division by zero";
     y := newPadic precision x;
