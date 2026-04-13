@@ -68,6 +68,12 @@ where $\nu\in\ZZ$ and $a_n\in\{0,\ldots,p-1\}$, together with the usual operatio
 
 For a given $x\in\QQ_p$, its \textit{$p$-adic valuation}, denoted $\nu_p(x)$, is the smallest nonzero exponent that appears in the expansion given in \Cref{p-adic expansion}, e.g., $\nu_3(1\cdot 3^{-2} + 2\cdot 3^{-1})=-2$.  In particular, $\nu_p(0) = \infty$.
 
+These series are not convergent in general using the usual absolute value, but they do converge using the $p$-adic absolute value
+\begin{equation*}
+|x|_p = p^{-\nu_p(x)}.
+\end{equation*}
+In fact, $\QQ_p$ is the completion of $\QQ$ under $|\cdot|_p$.
+
 The set of all $x\in\QQ_p$ with $\nu_p(x)\geq 0$ forms a ring, known as the \textit{$p$-adic integers} and denoted $\ZZ_p$.  Furthermore, the multiplicative subgroup $\ZZ_p^\times$ of the units of $\ZZ_p$ is precisely the $u\in\QQ_p$ for which $\nu_p(u) = 0$.  It follows that for any $x\in\QQ_p$ with $\nu_p(x)=\nu$,
 \begin{equation}\label{in terms of unit}
   x = \sum_{n=\nu}^\infty a_n p^n = \left(\sum_{n=0}^\infty a_{n + \nu}p^n\right)p^\nu = up^\nu,
