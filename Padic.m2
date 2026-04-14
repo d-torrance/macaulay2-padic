@@ -200,6 +200,8 @@ PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
 
 peek'(ZZ, PadicNumber) := lookup(peek', ZZ, HashTable)
 
+describe PadicNumber := x -> describe(unit x * Power(prime x, valuation x))
+
 knownPadicFields = new MutableHashTable
 
 -- want to use QQ_p, but Ring_ZZ already exists, so overwrite it
