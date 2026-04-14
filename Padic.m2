@@ -191,6 +191,7 @@ prime PadicNumber := x -> (class x).prime
 numdigits := x -> floor log(10, x) + 1
 toString PadicNumber := x -> (
     (N, v, p) := (precision x, valuation x, prime x);
+    if v == infinity then v = 0;
     -- from src/padic/get_str.c
     n := (N - v) * (2 * numdigits p + numdigits max(abs v, abs N) + 5) + 1;
     value padicGetStr(concatenate(n:"\0"), x.number, x.context))
