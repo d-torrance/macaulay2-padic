@@ -24,6 +24,7 @@
 \usepackage{amssymb}
 \usepackage{cleveref}
 
+\newcommand{\FF}{\mathbb F}
 \newcommand{\QQ}{\mathbb Q}
 \newcommand{\RR}{\mathbb R}
 \newcommand{\ZZ}{\mathbb Z}
@@ -91,6 +92,12 @@ and for $x\in\QQ_p$ with $|x-1|_p < 1$,
 \end{equation*}
 
 Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, known as the \textit{Teichm\"uller lift} of $x$, for which $x\equiv t\pmod p$ and $t^p = t$.
+
+\section{$p$-adic numbers in FLINT}
+
+FLINT (Fast Library for Number Theory) \cite{flint} is a C library implementing a wide variety of number theoretical features.  A number of these features, including ball arithmetic and certain computations over $\ZZ$, $\QQ$, and $\FF_{p^k}$, are already used by the Macaulay2 engine and interpreter.
+
+FLINT's $p$-adic number module was added by Sebastian Pancratz.  To represent $x\in\QQ_p$, the expansion from \Cref{in terms of unit} is used.  However, since a given $u\in\ZZ_p^\times$ may require infinitely many digits in base $p$ to represent, it is truncated up to a given precision $N$.  In other words, 
 
 \begin{credits}
 % \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
