@@ -25,6 +25,7 @@
 \usepackage{cleveref}
 
 \newcommand{\QQ}{\mathbb Q}
+\newcommand{\RR}{\mathbb R}
 \newcommand{\ZZ}{\mathbb Z}
 
 
@@ -72,29 +73,33 @@ These series are not convergent in general using the usual absolute value, but t
 \begin{equation*}
 |x|_p = p^{-\nu_p(x)}.
 \end{equation*}
-In fact, $\QQ_p$ is the completion of $\QQ$ under $|\cdot|_p$.
+In fact, $\QQ_p$ is the completion of $\QQ$ under $|\cdot|_p$, just as $\RR$ is the completion of $\QQ$ under the usual absolute value.
 
-The set of all $x\in\QQ_p$ with $\nu_p(x)\geq 0$ forms a ring, known as the \textit{$p$-adic integers} and denoted $\ZZ_p$.  Furthermore, the multiplicative subgroup $\ZZ_p^\times$ of the units of $\ZZ_p$ is precisely the $u\in\QQ_p$ for which $\nu_p(u) = 0$.  It follows that for any $x\in\QQ_p$ with $\nu_p(x)=\nu$,
+The set of all $x\in\QQ_p$ with $\nu_p(x)\geq 0$ forms a ring, known as the \textit{$p$-adic integers} and denoted $\ZZ_p$.  Furthermore, the multiplicative group $\ZZ_p^\times$ of the units of $\ZZ_p$ is precisely the $u\in\QQ_p$ for which $\nu_p(u) = 0$.  It follows that for any nonzero $x\in\QQ_p$ with $\nu_p(x)=\nu$,
 \begin{equation}\label{in terms of unit}
   x = \sum_{n=\nu}^\infty a_n p^n = \left(\sum_{n=0}^\infty a_{n + \nu}p^n\right)p^\nu = up^\nu,
 \end{equation}
 where $u=\sum\limits_{n=0}^\infty a_{n + \nu}p^n\in\ZZ_p^\times$.
 
+The $p$-adic exponential and logarithmic functions are defined using their usual power series expansions provided that they converge, i.e., for $x\in\QQ_p$ with $|x|_p < p^{-\frac{1}{p-1}}$,
+\begin{equation*}
+  \exp_p x = \sum_{n=0}^\infty\frac{x^n}{n!}
+\end{equation*}
+and for $x\in\QQ_p$ with $|x-1|_p < 1$,
+\begin{equation*}
+  \log_p x = \sum_{n=1}^\infty\frac{(-1)^{n-1}(x-1)^n}{n}.
+\end{equation*}
+
+Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, known as the \textit{Teichm\"uller lift} of $x$, for which $x\equiv t\pmod p$ and $t^p = t$.
+
 \begin{credits}
-\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
-used for general acknowledgments, for example: This study was funded
-by X (grant number Y).
+% \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
+% used for general acknowledgments, for example: This study was funded
+% by X (grant number Y).
 
 \subsubsection{\discintname}
-It is now necessary to declare any competing interests or to specifically
-state that the authors have no competing interests. Please place the
-statement with a bold run-in heading in small font size beneath the
-(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
-system, is used, then the disclaimer can be provided directly in the system.},
-for example: The authors have no competing interests to declare that are
-relevant to the content of this article. Or: Author A has received research
-grants from Company W. Author B has received a speaker honorarium from
-Company X and owns stock in Company Y. Author C is a member of committee Z.
+The author has no competing interests to declare that are
+relevant to the content of this article.
 \end{credits}
 %
 % ---- Bibliography ----
