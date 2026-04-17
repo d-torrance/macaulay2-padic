@@ -35,7 +35,7 @@
 \title{Implementing $p$-adic numbers in Macaulay2 using its foreign function interface and FLINT}
 
 
-\titlerunning{Implementing $p$-adic numbers in M2 using FLINT}
+\titlerunning{Implementing $p$-adic numbers in Macaulay2 using its FFI and FLINT}
 %
 \author{Douglas A. Torrance\inst{1}\orcidID{0000-0003-3999-4973}}
 %
@@ -97,7 +97,28 @@ Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, 
 
 FLINT (Fast Library for Number Theory) \cite{flint} is a C library implementing a wide variety of number theoretical features.  A number of these features, including ball arithmetic and certain computations over $\ZZ$, $\QQ$, and $\FF_{p^k}$, are already used by the Macaulay2 engine and interpreter.
 
-FLINT's $p$-adic number module was added by Sebastian Pancratz.  To represent $x\in\QQ_p$, the expansion from \Cref{in terms of unit} is used.  However, since a given $u\in\ZZ_p^\times$ may require infinitely many digits in base $p$ to represent, it is truncated up to a given precision $N$.  In other words, 
+FLINT's $p$-adic number module was written by Sebastian Pancratz.  To represent $x\in\QQ_p$, the expansion from \Cref{in terms of unit} is used.  However, since a given $u\in\ZZ_p^\times$ may require infinitely many digits in base $p$ to represent, it is truncated up to a given precision $N$.  In other words, the elements $x\in\QQ_p$ that may be represented in FLINT are those of the form $x = up^\nu$ where
+\begin{equation*}
+  u = \sum_{n = 0}^{N-1}a_{n+\nu}p^n.
+\end{equation*}
+
+Since $u$ has finitely many nonzero digits, we certainly have $u\in\ZZ$, and so it is sufficient to represent $x$ using the integers $u$, $\nu$, $N$, and $p$.
+
+FLINT uses two main types for its $p$-adic number module.  A \texttt{padic\_t} object is an array containing a single struct containing $u$, $\nu$, and $N$, and a \texttt{padic\_ctx\_t} is an array containing a struct with information about $p$.  This information is separated so that the same \texttt{padic\_ctx\_t} object may be used for computations involving multiple \texttt{padic\_t} objects.
+
+\begin{tabular}{cc}
+  operation & FLINT function \\ \hline
+  $-x$ & \texttt{padic\_neg} \\
+  $x^{-1}$ & \texttt{padic\_inv} \\
+  $x+y$ & \texttt{padic\_add} \\
+  $x-y$ & \texttt{padic\_sub} \\
+  $x\times y$ & \texttt{padic\_mul} \\
+  $x\div y$ & \texttt{padic\_div} \\
+  $x^n$ & \texttt{padic\_pow\_si} \\
+  
+\end{tabular}
+
+
 
 \begin{credits}
 % \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
