@@ -213,27 +213,33 @@ Instances of \texttt{QQ\_p} are hash tables containing pointers to the correspon
 
 \section{Example: Hensel's lemma}
 
-We close with an example of Hensel's lemma.  In particular, we would like to compute the cube root of 2 in $\QQ_5$.
+We close with an example, showing how to use our Macaulay2 package to find roots of polynomials over $\ZZ_p$.  We first recall Hensel's lemma, a fundamental result in $p$-adic analysis.  
 
-% explain 
+\begin{lemma}[Hensel \cite{hensel}]
+  Suppose $f\in\ZZ_p[x]$.  If there exists $\alpha_1\in\ZZ_p$ for which $f(\alpha_1)\equiv 0\pmod p$ and $f'(\alpha_1)\not\equiv 0\pmod p$, then there exists $\alpha\in\ZZ_p$ with $\alpha\equiv \alpha_1\pmod p$ and $f(\alpha) = 0$.  Furthermore, $\alpha$ is the limit with respect to $|\cdot|_p$ of the recursive sequence given by Newton's method,
+  \begin{equation*}
+    \alpha_{n+1} = \alpha_n - \frac{f(\alpha_n)}{f'(\alpha_n)}.
+  \end{equation*}
+\end{lemma}
 
-Since $3^3-2\equiv 0\pmod 5$, we begin our first iteration with $x = 3$.
+We would like to use Macaulay2 to compute the cube root of 2 in $\ZZ_5$ by finding a root of $x^3-2\in\ZZ_5[x]$.  Since $3^3-2=25\equiv 0\pmod 5$ and $3\cdot 3^2 = 27\not\equiv 0\pmod 5$, we begin with $\alpha_1 = 3$.  We then iterate Newton's method until it converges (up to the $5^{19}$ term, as FLINT's default precision for $p$-adics is $N=20$).  See \Cref{hensel lemma example code}.
 
-\begin{minted}{macaulay2}
+\begin{listing}[h]
+\begin{minted}[frame=lines,framesep=1ex]{macaulay2}
 i1 : needsPackage "Padic";
 
 i2 : newton = x -> x - (x^3 - 2)/(3*x^2);
 
-i3 : x = QQ_5 3
+i3 : alpha = QQ_5 3
 
 o3 = 3
 
 o3 : QQ  (of precision 20)
        5
 
-i4 : while x != (x = newton x) do null
+i4 : while alpha != (alpha = newton alpha) do null
 
-i5 : x
+i5 : alpha
 
 o5 = 3 + 2*5^2 + 2*5^3 + 3*5^4 + 1*5^5 + 4*5^6 + 2*5^8 + 3*5^9 +
      4*5^12 + 4*5^14 + 4*5^15 + 3*5^16 + 1*5^17 + 1*5^18 + 2*5^19
@@ -241,13 +247,16 @@ o5 = 3 + 2*5^2 + 2*5^3 + 3*5^4 + 1*5^5 + 4*5^6 + 2*5^8 + 3*5^9 +
 o5 : QQ  (of precision 20)
        5
 
-i6 : x^3
+i6 : alpha^3 -- check
 
 o6 = 2
 
 o6 : QQ  (of precision 20)
        5
 \end{minted}
+\caption{Computing the cube root of 2 in $\ZZ_5$ using Macaulay2}
+\label{hensel lemma example code}
+\end{listing}
 
 
 \begin{credits}
