@@ -401,6 +401,14 @@ assert BinaryOperation(symbol ===, interval(QQ_2 5, 6), interval(5, 6))
 assert BinaryOperation(symbol ===, interval(5, QQ_2 6), interval(5, 6))
 ///
 
+TEST ///
+-- hensel's lemma example (cube root of 2 in QQ_5)
+newton = x -> x - (x^3 - 2)/(3*x^2)
+x = QQ_5 3
+while x != (x = newton x) do null
+assert Equation(x^3, 2)
+///
+
 end
 
 loadPackage("Padic", FileName => "~/src/macaulay2/macaulay2-padic/Padic.m2", Reload => true)
