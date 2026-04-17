@@ -22,8 +22,12 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{hyperref}
 \usepackage{cleveref}
+\usepackage{minted}
+\usepackage{tikz-uml}
 
+\newcommand{\CC}{\mathbb C}
 \newcommand{\FF}{\mathbb F}
 \newcommand{\QQ}{\mathbb Q}
 \newcommand{\RR}{\mathbb R}
@@ -93,31 +97,121 @@ and for $x\in\QQ_p$ with $|x-1|_p < 1$,
 
 Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, known as the \textit{Teichm\"uller lift} of $x$, for which $x\equiv t\pmod p$ and $t^p = t$.
 
-\section{$p$-adic numbers in FLINT}
+\section{$p$-adic numbers in FLINT}\label{flint p-adic module}
 
 FLINT (Fast Library for Number Theory) \cite{flint} is a C library implementing a wide variety of number theoretical features.  A number of these features, including ball arithmetic and certain computations over $\ZZ$, $\QQ$, and $\FF_{p^k}$, are already used by the Macaulay2 engine and interpreter.
 
 FLINT's $p$-adic number module was written by Sebastian Pancratz.  To represent $x\in\QQ_p$, the expansion from \Cref{in terms of unit} is used.  However, since a given $u\in\ZZ_p^\times$ may require infinitely many digits in base $p$ to represent, it is truncated up to a given precision $N$.  In other words, the elements $x\in\QQ_p$ that may be represented in FLINT are those of the form $x = up^\nu$ where
-\begin{equation*}
+\begin{equation}\label{p-adic with precision}
   u = \sum_{n = 0}^{N-1}a_{n+\nu}p^n.
-\end{equation*}
+\end{equation}
 
 Since $u$ has finitely many nonzero digits, we certainly have $u\in\ZZ$, and so it is sufficient to represent $x$ using the integers $u$, $\nu$, $N$, and $p$.
 
-FLINT uses two main types for its $p$-adic number module.  A \texttt{padic\_t} object is an array containing a single struct containing $u$, $\nu$, and $N$, and a \texttt{padic\_ctx\_t} is an array containing a struct with information about $p$.  This information is separated so that the same \texttt{padic\_ctx\_t} object may be used for computations involving multiple \texttt{padic\_t} objects.
+FLINT uses two main types in its $p$-adic number module.  A \texttt{padic\_t} object contains $u$, $\nu$, and $N$, and a \texttt{padic\_ctx\_t} object contains information about $p$.  This information is separated so that the same \texttt{padic\_ctx\_t} object may be used for computations involving multiple \texttt{padic\_t} objects.
 
-\begin{tabular}{cc}
-  operation & FLINT function \\ \hline
-  $-x$ & \texttt{padic\_neg} \\
-  $x^{-1}$ & \texttt{padic\_inv} \\
-  $x+y$ & \texttt{padic\_add} \\
-  $x-y$ & \texttt{padic\_sub} \\
-  $x\times y$ & \texttt{padic\_mul} \\
-  $x\div y$ & \texttt{padic\_div} \\
-  $x^n$ & \texttt{padic\_pow\_si} \\
-  
-\end{tabular}
+A variety of functions exist for performing operations on $p$-adic numbers in FLINT.  See \Cref{flint p-adic functions} for a selection.
 
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline
+    operation & FLINT function \\ \hline\hline
+    $-x$ & \texttt{padic\_neg} \\
+    $x^{-1}$ & \texttt{padic\_inv} \\
+    $x+y$ & \texttt{padic\_add} \\
+    $x-y$ & \texttt{padic\_sub} \\
+    $x\times y$ & \texttt{padic\_mul} \\
+    $x\div y$ & \texttt{padic\_div} \\
+    $x^n$ $(n\in\ZZ)$ & \texttt{padic\_pow\_si} \\
+    $\sqrt x$ & \texttt{padic\_sqrt} \\
+    $\exp_p x$ & \texttt{padic\_exp} \\
+    $\log_p x$ & \texttt{padic\_log} \\
+    Teichm\"uller lift & \texttt{padic\_teichmuller} \\
+    $x = y$ & \texttt{padic\_equal} \\
+    $x = 0$ & \texttt{padic\_is\_zero} \\
+    \hline
+  \end{tabular}
+  \vspace{1em}
+  \caption{FLINT functions for operations in $\QQ_p$}
+  \label{flint p-adic functions}
+\end{table}
+
+Furthermore, functions exist for converting back and forth between \texttt{padic\_t} objects and \texttt{fmpz\_t} and \texttt{fmpq\_t} objects, which are FLINT's implementation of integers and rationals, respectively.  In particular, using the natural inclusion map $\ZZ\hookrightarrow\QQ_p$ (resp. $\QQ\hookrightarrow\QQ_p$), we may promote an element of $\ZZ$ (resp. $\QQ$) to $\QQ_p$ using \texttt{padic\_set\_fmpz} (resp. \texttt{padic\_set\_fmpq}), and if possible, we may lift an element of $\QQ_p$ to $\ZZ$ (resp. $\QQ$) using \texttt{padic\_get\_fmpz} (resp. \texttt{padic\_get\_fmpq}).
+
+\section{Foreign function interface and memory allocation}
+
+The \textit{ForeignFunctions} package in Macaulay2 \cite{foreign-functions} allows users to make calls to functions in shared libraries such as FLINT without writing any C code or re-compiling the Macaulay2 binary.  In particular, we may use it to call the $p$-adic functions outlined in \Cref{flint p-adic module}.
+
+Macaulay2 uses the Boehm-Demers-Weiser conservative garbage collector \cite{bdwgc} to allocate and, as needed, deallocate memory.  However, each of the various FLINT types used in the $p$-adic number module has functions for both initializing and clearing the memory used by instances of that type.  For example, \texttt{padic\_init} (or \texttt{padic\_init2} to specify the precision) is used to initialize a \texttt{padic\_t} object and \texttt{padic\_clear} is used to clear it.
+
+Therefore, after allocating the memory for a FLINT object and calling the corresponding initialization function, we must register a finalizer so that when the garbage is collected and the memory is freed, the appropriate FLINT function is also called. See \Cref{garbage collection example}.  Note that when allocating memory for a \texttt{padic\_t} object, we are allocating memory for a struct that fits three \texttt{long} integers -- $u$, $\nu$, and $N$ from \Cref{p-adic with precision}.\footnote{Actually, $u$ is a \texttt{fmpz\_t} object, which is either a \texttt{long} integer or, if needed, a pointer to an arbitrary precision integer.}
+
+\begin{listing}[h]
+  \begin{minted}[frame=lines,framesep=1ex]{macaulay2}
+needsPackage "ForeignFunctions"
+flint = openSharedLibrary "flint"
+padicInit = foreignFunction(flint, "padic_init", void, voidstar)
+padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
+y = getMemory(3 * size long)
+padicInit y
+registerFinalizer(y, padicClear)
+\end{minted}
+\caption{Initializing a \texttt{padic\_t} object}
+\label{garbage collection example}
+\end{listing}
+
+\section{Object-oriented design}
+
+Just using the foreign function interface to call FLINT functions is not sufficient for doing computations over $\QQ_p$ in Macaulay2.  It is necessary to provide a top-level interface with which users will interact and that wraps the low-level calls to FLINT via the foreign function interface.
+
+Because of the similarities with the real and complex fields in that we are dealing with numbers with potentially infinitely many digits, let us first review how $\RR$ and $\CC$ are implemented in Macaulay2.  Real and complex numbers are instances of the classes \texttt{RR} and \texttt{CC}, respectively.  These classes are both instances of \texttt{InexactFieldFamily} but subclasses of \texttt{InexactNumber}.\footnote{There also exists objects representing the fields $\RR$ and $\CC$ that depend on the floating-point precision used, e.g., \texttt{RR\_53} and \texttt{CC\_53} for double precision.  We have not yet implemented analogous objects for $\QQ_p$.}
+
+To parallel this, for a given prime number \texttt{p}, we let the class \texttt{QQ\_p} be an instance of \texttt{PadicFieldFamily} and a subclass of \texttt{PadicNumber}.  See the class diagrams in \Cref{type class diagram} and \Cref{object class diagram}.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \umlemptyclass[y=4]{Type}
+    \umlemptyclass[y=2]{RingFamily}
+    \umlemptyclass[x=-2]{InexactFieldFamily}
+    \umlemptyclass[x=2]{PadicFieldFamily}
+    \umlinherit{RingFamily}{Type}
+    \umlinherit{InexactFieldFamily}{RingFamily}
+    \umlinherit{PadicFieldFamily}{RingFamily}
+  \end{tikzpicture}
+  \caption{Class diagram for number types}
+  \label{type class diagram}
+\end{figure}
+
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \umlemptyclass[x=1,y=4]{Number}
+    \umlemptyclass[x=-2,y=2]{InexactNumber}
+    \umlemptyclass[x=4,y=2]{PadicNumber}
+    \umlemptyclass[x=-3]{RR}
+    \umlemptyclass[x=-1]{CC}
+    \umlemptyclass[x=1]{QQ$_2$}
+    \umlemptyclass[x=3]{QQ$_3$}
+    \umlemptyclass[x=5]{QQ$_5$}
+    \umlinherit{InexactNumber}{Number}
+    \umlinherit{PadicNumber}{Number}
+    \umlinherit{RR}{InexactNumber}
+    \umlinherit{CC}{InexactNumber}
+    \umlinherit{QQ$_2$}{PadicNumber}
+    \umlinherit{QQ$_3$}{PadicNumber}
+    \umlinherit{QQ$_5$}{PadicNumber}
+    \draw (6.5, 0) node {$\cdots$};
+  \end{tikzpicture}
+  \caption{Class diagram for number objects}
+  \label{object class diagram}
+\end{figure}
+
+Instances of \texttt{QQ\_p} are hash tables containing pointers to the corresponding \texttt{padic\_t} and \texttt{padic\_ctx\_t} objects.  The latter are memoized to avoid duplication.  Then methods are installed on \texttt{PadicNumber} wrapping each of the foreign functions from FLINT, e.g., \texttt{PadicNumber + PadicNumber} calls \texttt{padic\_add}.
+
+\section{Example}
 
 
 \begin{credits}
@@ -139,3 +233,7 @@ relevant to the content of this article.
 \bibliography{macaulay2-padic}
 
 \end{document}
+
+%%% Local Variables:
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:
