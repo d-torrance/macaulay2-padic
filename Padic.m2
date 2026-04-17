@@ -334,6 +334,11 @@ lift(PadicNumber, QQ) := o -> (x, kk) -> (
     padicGetFmpq(y, x.number, x.context);
     fromFmpq y)
 
+ZZ_PadicFieldFamily      :=
+QQ_PadicFieldFamily      :=
+promote(ZZ, PadicNumber) :=
+promote(QQ, PadicNumber) := (x, kk) -> kk x
+
 numeric PadicNumber := x -> numeric x^QQ
 numeric(ZZ, PadicNumber) := (prec, x) -> numeric(prec, x^QQ)
 interval PadicNumber := o -> x -> interval(x^QQ, o)
