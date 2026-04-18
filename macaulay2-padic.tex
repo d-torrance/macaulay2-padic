@@ -13,16 +13,16 @@
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
+\usepackage{hyperref}
 % If you use the hyperref package, please uncomment the following two lines
 % to display URLs in blue roman font according to Springer's eBook style:
-%\usepackage{color}
-%\renewcommand\UrlFont{\color{blue}\rmfamily}
-%\urlstyle{rm}
+\usepackage{color}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+\urlstyle{rm}
 %
 
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{minted}
 \usepackage{tikz-uml}
@@ -61,7 +61,15 @@
 %
 \section{Introduction}
 
-\section{A review of $p$-adic numbers}
+Macaulay2 \cite{M2} is an important research tool for computational algebraic geometers and commutative algebraists.  It supports computations in a wide variety of rings, including $\ZZ$, $\QQ$, $\RR$, $\CC$, $\FF_{p^k}$, polynomial rings, quotient rings, and fraction fields.  However, historically it has not supported computations in the field $\QQ_p$ of $p$-adic numbers.
+
+Enter FLINT \cite{flint}, a popular C library for number theory, which does support $p$-adic numbers.  Using the Macaulay2 foreign function interface \cite{foreign-functions}, it is possible to make calls to $p$-adic number functions in FLINT from top-level Macaulay2.  We introduce the \textit{Padic} package for Macaulay2, available at \url{https://github.com/d-torrance/macaulay2-padic}, which does this to provide an interface for Macaulay2 users to perform computations in $\QQ_p$.
+
+This exists as a proof of concept, as potentially $p$-adic support (likely still using FLINT) might one day be added to the Macaulay2 engine and interpreter so that computations in not just $\QQ_p$, but in polynomial rings over $\QQ_p$ and using matrices with entries in $\QQ_p$, are possible.
+
+This paper is organized as follows.  In \Cref{p-adic review}, we provide a brief overview of the $p$-adic numbers, and in \Cref{flint p-adic module} we describe their support in FLINT.  In \Cref{ffi overview}, we describe how Macaulay2 interacts with FLINT at a low level, and in \Cref{object-oriented design}, we look at the interface from a higher level, describing in particular various design decisions.  Finally, we close with a Macaulay2 computation demonstrating Hensel's lemma in \Cref{hensel example}.
+
+\section{A review of $p$-adic numbers}\label{p-adic review}
 
 We open with a crash course on $p$-adic numbers.  The reader is encouraged to reference a textbook such as \cite{gouvea} for more information.
 
@@ -137,9 +145,9 @@ A variety of functions exist for performing operations on $p$-adic numbers in FL
   \label{flint p-adic functions}
 \end{table}
 
-Furthermore, functions exist for converting back and forth between \texttt{padic\_t} objects and \texttt{fmpz\_t} and \texttt{fmpq\_t} objects, which are FLINT's implementation of integers and rationals, respectively.  In particular, using the natural inclusion map $\ZZ\hookrightarrow\QQ_p$ (resp. $\QQ\hookrightarrow\QQ_p$), we may promote an element of $\ZZ$ (resp. $\QQ$) to $\QQ_p$ using \texttt{padic\_set\_fmpz} (resp. \texttt{padic\_set\_fmpq}), and if possible, we may lift an element of $\QQ_p$ to $\ZZ$ (resp. $\QQ$) using \texttt{padic\_get\_fmpz} (resp. \texttt{padic\_get\_fmpq}).
+Furthermore, functions exist for converting back and forth between \texttt{padic\_t} objects and \texttt{fmpz\_t} and \texttt{fmpq\_t} objects, which are FLINT's implementations of integers and rationals, respectively.  In particular, using the natural inclusion map $\ZZ\hookrightarrow\QQ_p$ (resp. $\QQ\hookrightarrow\QQ_p$), we may promote an element of $\ZZ$ (resp. $\QQ$) to $\QQ_p$ using \texttt{padic\_set\_fmpz} (resp. \texttt{padic\_set\_fmpq}), and if possible, we may lift an element of $\QQ_p$ to $\ZZ$ (resp. $\QQ$) using \texttt{padic\_get\_fmpz} (resp. \texttt{padic\_get\_fmpq}).
 
-\section{Foreign function interface and memory allocation}
+\section{Foreign function interface and memory allocation}\label{ffi overview}
 
 The \textit{ForeignFunctions} package in Macaulay2 \cite{foreign-functions} allows users to make calls to functions in shared libraries such as FLINT without writing any C code or re-compiling the Macaulay2 binary.  In particular, we may use it to call the $p$-adic functions outlined in \Cref{flint p-adic module}.
 
@@ -161,7 +169,7 @@ registerFinalizer(y, padicClear)
 \label{garbage collection example}
 \end{listing}
 
-\section{Object-oriented design}
+\section{Object-oriented design}\label{object-oriented design}
 
 Just using the foreign function interface to call FLINT functions is not sufficient for doing computations over $\QQ_p$ in Macaulay2.  It is necessary to provide a top-level interface with which users will interact and that wraps the low-level calls to FLINT via the foreign function interface.
 
@@ -211,7 +219,7 @@ To parallel this, for a given prime number \texttt{p}, we let the class \texttt{
 
 Instances of \texttt{QQ\_p} are hash tables containing pointers to the corresponding \texttt{padic\_t} and \texttt{padic\_ctx\_t} objects.  The latter are memoized to avoid duplication.  Then methods are installed on \texttt{PadicNumber} wrapping each of the foreign functions from FLINT, e.g., \texttt{PadicNumber + PadicNumber} calls \texttt{padic\_add}.
 
-\section{Example: Hensel's lemma}
+\section{Example: Hensel's lemma}\label{hensel example}
 
 We close with an example, showing how to use our Macaulay2 package to find roots of polynomials over $\ZZ_p$.  We first recall Hensel's lemma, a fundamental result in $p$-adic analysis.  
 
