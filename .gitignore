@@ -1,3 +1,4 @@
+**/*~
 _minted-macaulay2-padic/
 macaulay2-padic.aux
 macaulay2-padic.bbl
@@ -5,3 +6,6 @@ macaulay2-padic.blg
 macaulay2-padic.log
 macaulay2-padic.out
 macaulay2-padic.pdf
+macaulay2-padic.pyg
+macaulay2-padic.tar.gz
+tar
