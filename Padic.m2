@@ -7,11 +7,13 @@ newPackage("Padic",
 	    Email => "dtorrance@piedmont.edu",
 	    HomePage => "https://webwork.piedmont.edu/~dtorrance"}},
     Keywords => {"Algebraic Number Theory"},
+    PackageExports => {"Valuations"},
     PackageImports => {"ForeignFunctions", "Valuations"})
 
 export {
     -- methods
     "prime",
+    "pVal",
     "teichmuller",
     "unit",
 
@@ -19,8 +21,6 @@ export {
     "PadicNumber",
     "PadicFieldFamily",
     }
-
-exportFrom(Valuations, "valuation")
 
 -- unexported symbols
 protect context
@@ -182,9 +182,11 @@ precision PadicNumber := x -> value padicGetPrec x.number
 unit = method()
 unit PadicNumber := x -> fromFmpz padicUnit x.number
 
-valuation PadicNumber := x -> (
-    if x == 0 then infinity
-    else value padicGetVal x.number)
+padicValuation PadicFieldFamily :=
+valuation PadicFieldFamily      := kk -> kk.valuation
+
+pVal = method()
+pVal PadicNumber := x -> (valuation class x) x
 
 prime = method()
 prime PadicFieldFamily := kk -> kk.prime
@@ -192,7 +194,7 @@ prime PadicNumber := x -> prime class x
 
 numdigits := x -> floor log(10, x) + 1
 toString PadicNumber := x -> (
-    (N, v, p) := (precision x, valuation x, prime x);
+    (N, v, p) := (precision x, pVal x, prime x);
     if v == infinity then v = 0;
     -- from src/padic/get_str.c
     n := (N - v) * (2 * numdigits p + numdigits max(abs v, abs N) + 5) + 1;
@@ -202,7 +204,7 @@ PadicNumber.AfterPrint = lookup(AfterPrint, InexactNumber)
 
 peek'(ZZ, PadicNumber) := lookup(peek', ZZ, HashTable)
 
-describe PadicNumber := x -> describe(unit x * Power(prime x, valuation x))
+describe PadicNumber := x -> describe(unit x * Power(prime x, pVal x))
 
 knownPadicFields = new MutableHashTable
 
@@ -212,9 +214,15 @@ Ring _ ZZ := (R, p) -> (
     if R =!= QQ then oldRingSubZZ(R, p)
     else (
 	if not isPrime p then error "expected a prime number";
-	knownPadicFields#p ??= (
+	QQp := knownPadicFields#p ??= (
 	    new PadicFieldFamily of PadicNumber
-	    from hashTable {symbol prime => p})))
+	    from hashTable {symbol prime => p});
+	QQp.valuation = valuation(
+	    x -> (
+		if x == 0 then infinity
+		else value padicGetVal (QQp x).number),
+	    QQp, ZZ);
+	QQp))
 
 new PadicNumber from (voidstar, voidstar) := (T, ctx, num) -> (
     new T from hashTable {
@@ -290,7 +298,7 @@ PadicNumber << ZZ := (x, y) -> (
 
 +PadicNumber := identity
 
-abs PadicNumber := x -> (prime x)^(-valuation x)
+abs PadicNumber := x -> (prime x)^(-pVal x)
 
 inverse PadicNumber := x -> (
     if x == 0 then error "division by zero";
@@ -323,13 +331,13 @@ log PadicNumber := x -> (
 
 teichmuller = method()
 teichmuller PadicNumber := x -> (
-    if valuation x < 0 then error("expected a ", prime x, "-adic integer");
+    if pVal x < 0 then error("expected a ", prime x, "-adic integer");
     y := newPadic precision x;
     padicTeichmuller(y, x.number, x.context);
     QQ_(prime x)(x.context, y))
 
 lift(PadicNumber, ZZ) := o -> (x, kk) -> (
-    if valuation x < 0 then error("expected a ", prime x, "-adic integer");
+    if pVal x < 0 then error("expected a ", prime x, "-adic integer");
     y := toFmpz 0;
     padicGetFmpz(y, x.number, x.context);
     fromFmpz y)
@@ -372,8 +380,8 @@ assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
 ///
 
 TEST ///
-assert Equation(valuation QQ_7 49, 2)
-assert Equation(valuation QQ_7 0, infinity)
+assert Equation(pVal QQ_7 49, 2)
+assert Equation(pVal QQ_7 0, infinity)
 assert Equation(unit QQ_7 49, 1)
 assert Equation(precision QQ_7 49, 20)
 ///
