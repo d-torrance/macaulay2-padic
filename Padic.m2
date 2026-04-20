@@ -375,7 +375,123 @@ PadicNumber == Number := (x, y) -> (
     else x^QQ == y)
 Number == PadicNumber := (x, y) -> y == x
 
+beginDocumentation()
+
+doc ///
+  Key
+    Padic
+  Headline
+    p-adic numbers
+  Description
+    Text
+      TODO
+  Subnodes
+    PadicFieldFamily
+    PadicNumber
+///
+
+doc ///
+  Key
+    PadicFieldFamily
+  Headline
+    class for p-adic fields
+  Description
+    Text
+      This is the class of all $p$-adic fields.
+    Example
+      class QQ_7
+///
+
+undocumented {
+    (expression, PadicFieldFamily),
+    (net, PadicFieldFamily),
+    (toString, PadicFieldFamily)}
+
+doc ///
+  Key
+    PadicNumber
+  Headline
+    base class for p-adic numbers
+  Description
+    Text
+      Every $p$-adic number is an instance of the class @CODE "QQ_p"@ for
+      the appropriate value of @VAR "p"@.  However, each of of these classes
+      is a subclass of @CODE "PadicNumber"@.
+    Example
+      x = QQ_7 5
+      ancestors class x
+    Text
+      To install methods that work for all $p$-adic numbers, regardless of the
+      specific field, install methods for this class.
+    Example
+      foo = method()
+      foo PadicNumber := x -> x + 2
+      foo x
+  Subnodes
+    (precision, PadicNumber)
+    unit
+///
+
+doc ///
+  Key
+    (precision, PadicNumber)
+  Headline
+    precision of a p-adic number
+  Usage
+    precision x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :ZZ
+  Description
+    Text
+      Every $p$-adic number is stored with a maximum number of base $p$ digits.
+      This is its precision.
+    Example
+      x = QQ_7 (-1)
+      precision x
+      y = QQ_7(30, -2)
+      precision y
+    Text
+      When performing binary operations on $p$-adic numbers, the result has the
+      smallest of the two precisions.
+    Example
+      x + y
+      precision oo
+///
+
+doc ///
+  Key
+    unit
+    (unit, PadicNumber)
+  Headline
+    unit part of a p-adic number
+  Usage
+    unit x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :ZZ
+  Description
+    Text
+      Every $x\in\QQ_p$ can be decomposed into a product $x=up^\nu$, where
+      $u\in\ZZ_p^\times$, i.e., it is a unit in the ring of $p$-adic integers.
+      This function returns $u$ as an integer.
+    Example
+      x = QQ_7 (1/49)
+      unit x
+    Text
+      Note that in general, $u$ has infinitely many $p$-adic digits.  Therefore,
+      it is truncated based on the @TO2((precision, PadicNumber), "precision")@
+      of $x$.
+    Example
+      x = QQ_7(-1/49)
+      unit x
+///
+
 TEST ///
+assert Equation(net QQ_7, "QQ\n  7"^0)
+assert Equation(toString QQ_7, "QQ_7")
 assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
 ///
 
@@ -384,6 +500,7 @@ assert Equation(pVal QQ_7 49, 2)
 assert Equation(pVal QQ_7 0, infinity)
 assert Equation(unit QQ_7 49, 1)
 assert Equation(precision QQ_7 49, 20)
+assert Equation(precision QQ_7(30, 49), 30)
 ///
 
 TEST ///
