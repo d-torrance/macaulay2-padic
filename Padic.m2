@@ -229,6 +229,9 @@ new PadicNumber from (ZZ, Number) := (T, N, x) -> (
 new PadicNumber from Number := (T, x) -> new T from (20, x)
 new PadicNumber from Constant := (T, x) -> new T from numeric x
 new PadicNumber from (ZZ, Constant) := (T, N, x) -> new T from (N, numeric x)
+new PadicNumber from PadicNumber := (T, x) -> (
+    if prime T == prime x then x
+    else T(precision x, x^QQ))
 
 PadicFieldFamily Thing := (T, x) -> new T from x
 
@@ -336,10 +339,15 @@ lift(PadicNumber, QQ) := o -> (x, kk) -> (
     padicGetFmpq(y, x.number, x.context);
     fromFmpq y)
 
-ZZ_PadicFieldFamily      :=
-QQ_PadicFieldFamily      :=
-promote(ZZ, PadicNumber) :=
-promote(QQ, PadicNumber) := (x, kk) -> kk x
+lift(PadicNumber, PadicNumber) := o -> (x, kk) -> kk x
+
+Number^PadicFieldFamily := (x, kk) -> lift(x, kk)
+
+promote(ZZ, PadicNumber)          :=
+promote(QQ, PadicNumber)          :=
+promote(PadicNumber, PadicNumber) := (x, kk) -> kk x
+
+Number_PadicFieldFamily := (x, kk) -> promote(x, kk)
 
 numeric PadicNumber := x -> numeric x^QQ
 numeric(ZZ, PadicNumber) := (prec, x) -> numeric(prec, x^QQ)
