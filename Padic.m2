@@ -170,7 +170,7 @@ padicIsZero = foreignFunction(flint, "padic_is_zero", int, voidstar)
 PadicFieldFamily = new Type of RingFamily
 PadicFieldFamily.synonym = "p-adic field family"
 
-expression PadicFieldFamily := kk -> Subscript(QQ, kk.prime)
+expression PadicFieldFamily := kk -> Subscript(QQ, prime kk)
 net PadicFieldFamily := net @@ expression
 toString PadicFieldFamily := toString @@ expression
 
@@ -187,7 +187,8 @@ valuation PadicNumber := x -> (
     else value padicGetVal x.number)
 
 prime = method()
-prime PadicNumber := x -> (class x).prime
+prime PadicFieldFamily := kk -> kk.prime
+prime PadicNumber := x -> prime class x
 
 numdigits := x -> floor log(10, x) + 1
 toString PadicNumber := x -> (
@@ -221,7 +222,7 @@ new PadicNumber from (voidstar, voidstar) := (T, ctx, num) -> (
 	symbol number => num})
 new PadicNumber from (ZZ, Number) := (T, N, x) -> (
     try x _= QQ else x ^= QQ; -- promote/lift to QQ if needed
-    ctx := newPadicContext(T.prime, N);
+    ctx := newPadicContext(prime T, N);
     y := newPadic N;
     padicSetFmpq(y, toFmpq x, ctx);
     new T from (ctx, y))
