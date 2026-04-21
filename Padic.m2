@@ -8,7 +8,7 @@ newPackage("Padic",
 	    HomePage => "https://webwork.piedmont.edu/~dtorrance"}},
     Keywords => {"Algebraic Number Theory"},
     PackageExports => {"Valuations"},
-    PackageImports => {"ForeignFunctions", "Valuations"})
+    PackageImports => {"ForeignFunctions"})
 
 export {
     -- methods
