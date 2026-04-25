@@ -407,12 +407,6 @@ doc ///
       unit x
       abs x
     Text
-      Every nonzero $x \in \QQ_p$ factors as $x = u p^\nu$ where
-      $\nu = \nu_p(x)$ is the @TO2(pVal, "valuation") @ and
-      $u \in \ZZ_p^\times$ is a @TO unit@.  For example, above we see
-      $12/7 = 5 \cdot 7^{-1} + 1 \cdot 7^0 = (5 + 7^1)\cdot 7^{-1} = 12\cdot 7^{-1}$,
-      so $u = 12$ and $\nu_7(12/7) = -1$.
-
       This package is implemented using the
       @TO "ForeignFunctions::ForeignFunctions"@ package to call $p$-adic
       arithmetic routines from the @HREF("https://flintlib.org/", "FLINT")@
