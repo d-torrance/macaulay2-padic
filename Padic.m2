@@ -411,6 +411,10 @@ doc ///
       @TO "ForeignFunctions::ForeignFunctions"@ package to call $p$-adic
       arithmetic routines from the @HREF("https://flintlib.org/", "FLINT")@
       C library.
+
+      See the paper @arXiv("2604.16799",
+	  "Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT")@
+      for more information.
   Citation
     @misc{torrance2026implementingpadicnumbersmacaulay2,
       title={Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT},
