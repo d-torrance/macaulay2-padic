@@ -1109,24 +1109,43 @@ assert Equation(toString QQ_7(12/7), "5*7^-1 + 1")
 
 TEST ///
 assert Equation(pVal QQ_7 49, 2)
+assert Equation(pVal QQ_7(1/7), -1)
+assert Equation(pVal QQ_7 3, 0)
 assert Equation(pVal QQ_7 0, infinity)
 assert Equation(unit QQ_7 49, 1)
+assert Equation(unit QQ_7(12/7), 12)
 assert Equation(precision QQ_7 49, 20)
 assert Equation(precision QQ_7(30, 49), 30)
+assert Equation(prime QQ_7, 7)
+assert Equation(prime QQ_7 3, 7)
+assert Equation(abs QQ_7 49, 1/49)
+assert Equation(abs QQ_7(1/7), 7)
+assert Equation(abs QQ_7 3, 1)
 ///
 
 TEST ///
 assert Equation(QQ_7 3 + QQ_7 2, QQ_7 5)
+assert Equation(QQ_7 3 + 4, QQ_7 7)
+assert Equation(4 + QQ_7 3, QQ_7 7)
 assert Equation(QQ_7 3 - QQ_7 2, QQ_7 1)
+assert Equation(QQ_7 5 - 3, QQ_7 2)
+assert Equation(3 - QQ_7 5, QQ_7(-2))
 assert Equation(QQ_7 3 * QQ_7 2, QQ_7 6)
-assert Equation(QQ_2 3 / QQ_2 2, QQ_2 (3/2))
+assert Equation(QQ_7 3 * 4, QQ_7 12)
+assert Equation(4 * QQ_7 3, QQ_7 12)
+assert Equation(QQ_2 3 / QQ_2 2, QQ_2(3/2))
+assert Equation(QQ_7 6 / 3, QQ_7 2)
+assert Equation(6 / QQ_7 3, QQ_7 2)
 assert Equation(QQ_7 3 << 2, QQ_7(3 * 49))
 assert Equation(QQ_7 3 >> 2, QQ_7(3/49))
 assert Equation(-QQ_7 3 + QQ_7 3, 0)
 assert Equation(+QQ_7 3, QQ_7 3)
 assert Equation(QQ_7 3 * inverse QQ_7 3, QQ_7 1)
+assert Equation((QQ_7 3)^(-1), inverse QQ_7 3)
 assert Equation(sqrt QQ_7 4, QQ_7 2)
+assert Equation((sqrt QQ_7 2)^2, QQ_7 2)
 assert Equation((QQ_7 3)^2, QQ_7 9)
+assert Equation(precision(QQ_7(10, 3) + QQ_7(20, 4)), 10)
 assert Equation(log exp QQ_7 7, QQ_7 7)
 t = teichmuller QQ_7 3
 assert Equation(t^7 - t, 0)
@@ -1134,11 +1153,19 @@ assert Equation(t^7 - t, 0)
 
 TEST ///
 assert Equation(QQ_2 5, QQ_2 5)
+assert not (QQ_2 5 == QQ_2 6)
 assert Equation(QQ_2 5, QQ_3 5)
+assert not (QQ_2 5 == QQ_3 6)
 assert Equation(QQ_2 5, 5)
 assert Equation(5, QQ_2 5)
+-- since === doesn't work in QQ_p :(
+is = (x, y) -> assert(class x === class y and x == y)
+is(promote(5, QQ_2), QQ_2 5)
+is(promote(5/2, QQ_2), QQ_2(5/2))
+is(5_(QQ_2), QQ_2 5)
 assert BinaryOperation(symbol ===, (QQ_2 5)^ZZ, 5)
 assert BinaryOperation(symbol ===, (QQ_2 5)^QQ, 5/1)
+is(lift(QQ_2 5, QQ_2), QQ_2 5)
 assert BinaryOperation(symbol ===, numeric QQ_2 5, 5.0)
 assert BinaryOperation(symbol ===, numeric(100, QQ_2 5), 5p100)
 assert BinaryOperation(symbol ===, interval QQ_2 5, interval 5)
@@ -1146,6 +1173,21 @@ assert BinaryOperation(symbol ===, interval(QQ_2 5, Precision => 100), interval 
 assert BinaryOperation(symbol ===, interval(QQ_2 5, QQ_2 6), interval(5, 6))
 assert BinaryOperation(symbol ===, interval(QQ_2 5, 6), interval(5, 6))
 assert BinaryOperation(symbol ===, interval(5, QQ_2 6), interval(5, 6))
+///
+
+TEST ///
+-- error cases
+checkError = (f, msg) -> (
+    (ret, err) := trap f();
+    assert Equation(msg, toString err))
+checkError(() -> QQ_4, "expected a prime number")
+checkError(() -> QQ_7 1 / QQ_7 0, "division by zero")
+checkError(() -> inverse QQ_7 0, "division by zero")
+checkError(() -> sqrt QQ_7 3, "not a 7-adic square")
+checkError(() -> exp QQ_7 3, "7-adic exponential function does not converge")
+checkError(() -> log QQ_7 3, "7-adic logarithm function does not converge")
+checkError(() -> teichmuller QQ_7(1/7), "expected a 7-adic integer")
+checkError(() -> lift(QQ_7(1/7), ZZ), "expected a 7-adic integer")
 ///
 
 TEST ///
