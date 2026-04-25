@@ -1015,8 +1015,8 @@ doc ///
     Example
       promote(3, QQ_7)
       promote(3/2, QQ_7)
-      3_QQ_7
-      (3/2)_QQ_7
+      3_(QQ_7)
+      (3/2)_(QQ_7)
   SeeAlso
     (lift, PadicNumber, ZZ)
 ///
