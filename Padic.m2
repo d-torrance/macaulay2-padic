@@ -347,13 +347,17 @@ lift(PadicNumber, QQ) := o -> (x, kk) -> (
     padicGetFmpq(y, x.number, x.context);
     fromFmpq y)
 
-lift(PadicNumber, PadicNumber) := o -> (x, kk) -> kk x
+lift(PadicNumber, PadicNumber) := o -> (x, kk) -> (
+    if prime x == prime kk then x
+    else error("can't lift from ", toString class x, " to ", toString kk))
 
 Number^PadicFieldFamily := (x, kk) -> lift(x, kk)
 
 promote(ZZ, PadicNumber)          :=
-promote(QQ, PadicNumber)          :=
-promote(PadicNumber, PadicNumber) := (x, kk) -> kk x
+promote(QQ, PadicNumber)          := (x, kk) -> kk x
+promote(PadicNumber, PadicNumber) := (x, kk) -> (
+    if prime x == prime kk then x
+    else error("can't promote from ", toString class x, " to ", toString kk))
 
 Number_PadicFieldFamily := (x, kk) -> promote(x, kk)
 
