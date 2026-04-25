@@ -403,9 +403,6 @@ doc ///
       default @TO2((precision, PadicNumber), "precision")@ of 20 base-$p$ digits.
     Example
       x = QQ_7(12/7)
-      pVal x
-      unit x
-      abs x
     Text
       This package is implemented using the
       @TO "ForeignFunctions::ForeignFunctions"@ package to call $p$-adic
