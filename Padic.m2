@@ -961,33 +961,30 @@ doc ///
     (lift, PadicNumber, PadicNumber)
     (symbol ^, Number, PadicFieldFamily)
   Headline
-    lift a p-adic number to ZZ, QQ, or another p-adic field
+    lift a p-adic number to another ring
   Usage
-    lift(x, ZZ)
-    lift(x, QQ)
-    lift(x, kk)
-    y^kk
+    lift(x, R)
+    x^R
   Inputs
     x:PadicNumber
-    kk:PadicFieldFamily
-    y:Number
+    R:{ZZ, QQ, PadicNumber}
   Outputs
-    :Thing
-      an element of @TO ZZ@, @TO QQ@, or a @TO PadicNumber@
+    :Number -- an element of @VAR "R"@
   Description
     Text
-      Lift a $p$-adic number to an integer, a rational, or an element of another
-      $p$-adic field.
+      Lift a $p$-adic number to an other ring.  This is only well-defined when
+      @VAR "R"@ to @TO ZZ@, @TO QQ@, or the $p$-adic field containing @VAR "x"@.
     Example
       x = QQ_7 49
       lift(x, ZZ)
       lift(x, QQ)
+      lift(x, QQ_7)
     Text
-      The notation @CODE "y^kk"@, where @VAR "kk"@ is a @TO PadicFieldFamily@,
-      is shorthand for @CODE "lift(y, kk)"@.
+      As usual, the @TO symbol ^@ operator is a shorthand for this operation.
     Example
       x^ZZ
       x^QQ
+      x^(QQ_7)
   Caveat
     Lifting to @TO ZZ@ raises an error if the $p$-adic valuation of @VAR "x"@
     is negative.
@@ -1007,14 +1004,14 @@ doc ///
     promote(x, kk)
     x_kk
   Inputs
-    x:Number
-    kk:PadicFieldFamily
+    x:{ZZ, QQ, PadicNumber}
+    kk:PadicNumber
   Outputs
     :PadicNumber
   Description
     Text
       Promote an integer, rational, or $p$-adic number to the given $p$-adic
-      field.  The subscript notation @CODE "x_kk"@ may also be used.
+      field.  The subscript operator @TO symbol _@ may also be used.
     Example
       promote(3, QQ_7)
       promote(3/2, QQ_7)
@@ -1026,16 +1023,16 @@ doc ///
 
 doc ///
   Key
-    (numeric, PadicNumber)
     (numeric, ZZ, PadicNumber)
+    (numeric, PadicNumber)
   Headline
     convert a p-adic number to a real number
   Usage
-    numeric x
     numeric(prec, x)
+    numeric x
   Inputs
-    x:PadicNumber
     prec:ZZ -- number of bits of precision
+    x:PadicNumber
   Outputs
     :RR
   Description
@@ -1052,17 +1049,17 @@ doc ///
 
 doc ///
   Key
-    (interval, PadicNumber)
     (interval, PadicNumber, PadicNumber)
     (interval, PadicNumber, Number)
     (interval, Number, PadicNumber)
+    (interval, PadicNumber)
   Headline
     convert p-adic numbers to a real interval
   Usage
-    interval x
     interval(x, y)
+    interval x
   Inputs
-    x:PadicNumber
+    x:{PadicNumber, Number}
     y:{PadicNumber, Number}
   Outputs
     :RRi
