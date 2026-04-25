@@ -988,6 +988,7 @@ doc ///
     (lift, PadicNumber, QQ)
     (lift, PadicNumber, PadicNumber)
     (symbol ^, Number, PadicFieldFamily)
+    [lift, Verify]
   Headline
     lift a p-adic number to another ring
   Usage
@@ -1081,6 +1082,7 @@ doc ///
     (interval, PadicNumber, Number)
     (interval, Number, PadicNumber)
     (interval, PadicNumber)
+    [interval, Precision]
   Headline
     convert p-adic numbers to a real interval
   Usage
