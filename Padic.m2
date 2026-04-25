@@ -407,15 +407,29 @@ doc ///
     class for p-adic fields
   Description
     Text
-      This is the class of all $p$-adic fields.
+      For any prime $p$, the $p$-adic field $\QQ_p$ is represented in Macaulay2
+      by the object @CODE "QQ_p"@.
     Example
+      QQ_7
       class QQ_7
+    Text
+      Elements of $\QQ_p$ are created by applying the field to a number.
+      The default @TO2((precision, PadicNumber), "precision")@ is 20 base-$p$
+      digits; an explicit precision $N$ may be supplied as a first argument.
+    Example
+      QQ_7 3
+      QQ_7(30, 3)
+  Subnodes
+    prime
 ///
 
 undocumented {
     (expression, PadicFieldFamily),
     (net, PadicFieldFamily),
-    (toString, PadicFieldFamily)}
+    (toString, PadicFieldFamily),
+    (toString, PadicNumber),
+    (peek', ZZ, PadicNumber),
+    (describe, PadicNumber)}
 
 doc ///
   Key
@@ -440,6 +454,19 @@ doc ///
   Subnodes
     (precision, PadicNumber)
     unit
+    pVal
+    (symbol ==, PadicNumber, PadicNumber)
+    (symbol +, PadicNumber, PadicNumber)
+    (symbol *, PadicNumber, PadicNumber)
+    (abs, PadicNumber)
+    (symbol <<, PadicNumber, ZZ)
+    (symbol ^, PadicNumber, ZZ)
+    (exp, PadicNumber)
+    teichmuller
+    (lift, PadicNumber, ZZ)
+    (promote, ZZ, PadicNumber)
+    (numeric, PadicNumber)
+    (interval, PadicNumber)
 ///
 
 doc ///
@@ -497,6 +524,555 @@ doc ///
     Example
       x = QQ_7(-1/49)
       unit x
+///
+
+doc ///
+  Key
+    (symbol +, PadicNumber, PadicNumber)
+    (symbol +, PadicNumber, Number)
+    (symbol +, Number, PadicNumber)
+    (symbol +, PadicNumber)
+  Headline
+    add p-adic numbers
+  Usage
+    x + y
+  Inputs
+    x:PadicNumber
+    y:PadicNumber
+  Outputs
+    :PadicNumber -- the sum of x and y
+  Description
+    Text
+      Add two $p$-adic numbers.
+    Example
+      QQ_7 3 + QQ_7 11
+    Text
+      If one of the arguments is an ordinary number, it is first promoted to
+      the appropriate $p$-adic field.
+    Example
+      QQ_7 3 + 4
+      5 + QQ_7 6
+    Text
+      When adding two $p$-adic numbers, the result has the smaller of the two
+      @TO2((precision, PadicNumber), "precision")@ values.
+    Example
+      QQ_7(10, 3) + QQ_7(20, 4)
+    Text
+      The unary @CODE "+"@ operator is the identity.
+    Example
+      +QQ_7 3
+  Subnodes
+    (symbol -, PadicNumber, PadicNumber)
+///
+
+doc ///
+  Key
+    (symbol -, PadicNumber, PadicNumber)
+    (symbol -, PadicNumber, Number)
+    (symbol -, Number, PadicNumber)
+    (symbol -, PadicNumber)
+  Headline
+    subtract or negate p-adic numbers
+  Usage
+    x - y
+    -x
+  Inputs
+    x:PadicNumber
+    y:PadicNumber
+  Outputs
+    :PadicNumber -- the difference of x and y, or the negation of x
+  Description
+    Text
+      Subtract two $p$-adic numbers.
+    Example
+      QQ_7 11 - QQ_7 3
+    Text
+      If one of the arguments is an ordinary number, it is first promoted to
+      the appropriate $p$-adic field.
+    Example
+      QQ_7 11 - 3
+      11 - QQ_7 3
+    Text
+      The unary @CODE "-"@ operator negates a $p$-adic number.
+    Example
+      -QQ_7 3
+  SeeAlso
+    (symbol +, PadicNumber, PadicNumber)
+///
+
+doc ///
+  Key
+    (symbol *, PadicNumber, PadicNumber)
+    (symbol *, PadicNumber, Number)
+    (symbol *, Number, PadicNumber)
+  Headline
+    multiply p-adic numbers
+  Usage
+    x * y
+  Inputs
+    x:PadicNumber
+    y:PadicNumber
+  Outputs
+    :PadicNumber -- the product of x and y
+  Description
+    Text
+      Multiply two $p$-adic numbers.
+    Example
+      QQ_7 3 * QQ_7 5
+    Text
+      If one of the arguments is an ordinary number, it is first promoted to
+      the appropriate $p$-adic field.
+    Example
+      QQ_7 3 * 5
+      4 * QQ_7 3
+  SeeAlso
+    (symbol +, PadicNumber, PadicNumber)
+  Subnodes
+    (symbol /, PadicNumber, PadicNumber)
+    (inverse, PadicNumber)
+///
+
+doc ///
+  Key
+    (symbol /, PadicNumber, PadicNumber)
+    (symbol /, PadicNumber, Number)
+    (symbol /, Number, PadicNumber)
+  Headline
+    divide p-adic numbers
+  Usage
+    x / y
+  Inputs
+    x:PadicNumber
+    y:PadicNumber
+  Outputs
+    :PadicNumber -- the quotient of x and y
+  Description
+    Text
+      Divide two $p$-adic numbers.
+    Example
+      QQ_2 3 / QQ_2 2
+    Text
+      If one of the arguments is an ordinary number, it is first promoted to
+      the appropriate $p$-adic field.
+    Example
+      QQ_7 6 / 2
+      6 / QQ_7 2
+  Caveat
+    An error is raised if @VAR "y"@ is zero.
+  SeeAlso
+    (inverse, PadicNumber)
+///
+
+doc ///
+  Key
+    (inverse, PadicNumber)
+  Headline
+    multiplicative inverse of a p-adic number
+  Usage
+    inverse x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :PadicNumber -- the multiplicative inverse of x
+  Description
+    Text
+      Returns the multiplicative inverse of a $p$-adic number.
+    Example
+      inverse QQ_7 3
+      QQ_7 3 * inverse QQ_7 3
+  Caveat
+    An error is raised if @VAR "x"@ is zero.
+  SeeAlso
+    (symbol /, PadicNumber, PadicNumber)
+///
+
+doc ///
+  Key
+    (abs, PadicNumber)
+  Headline
+    p-adic absolute value
+  Usage
+    abs x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :QQ
+  Description
+    Text
+      Returns the $p$-adic absolute value $|x|_p = p^{-\nu_p(x)}$.
+    Example
+      abs QQ_7 49
+      abs QQ_7(1/7)
+      abs QQ_7 0
+  SeeAlso
+    pVal
+///
+
+doc ///
+  Key
+    (symbol <<, PadicNumber, ZZ)
+  Headline
+    multiply a p-adic number by a power of p
+  Usage
+    x << n
+  Inputs
+    x:PadicNumber
+    n:ZZ
+  Outputs
+    :PadicNumber -- x times p^n
+  Description
+    Text
+      Returns $x \cdot p^n$, shifting the $p$-adic expansion left by $n$ places.
+      A negative shift divides by $p^{|n|}$.
+    Example
+      QQ_7 3 << 2
+      QQ_7 3 << -1
+  Subnodes
+    (symbol >>, PadicNumber, ZZ)
+///
+
+doc ///
+  Key
+    (symbol >>, PadicNumber, ZZ)
+  Headline
+    divide a p-adic number by a power of p
+  Usage
+    x >> n
+  Inputs
+    x:PadicNumber
+    n:ZZ
+  Outputs
+    :PadicNumber -- x divided by p^n
+  Description
+    Text
+      Returns $x / p^n = x \cdot p^{-n}$, shifting the $p$-adic expansion right
+      by $n$ places.  A negative shift multiplies by $p^{|n|}$.
+    Example
+      QQ_7 3 >> 2
+      QQ_7 3 >> -1
+  SeeAlso
+    (symbol <<, PadicNumber, ZZ)
+///
+
+doc ///
+  Key
+    (symbol ^, PadicNumber, ZZ)
+  Headline
+    raise a p-adic number to an integer power
+  Usage
+    x^n
+  Inputs
+    x:PadicNumber
+    n:ZZ
+  Outputs
+    :PadicNumber -- x raised to the n-th power
+  Description
+    Text
+      Raise a $p$-adic number to an integer power.
+    Example
+      (QQ_7 3)^2
+      (QQ_7 3)^(-1)
+  Subnodes
+    (sqrt, PadicNumber)
+///
+
+doc ///
+  Key
+    (sqrt, PadicNumber)
+  Headline
+    square root of a p-adic number
+  Usage
+    sqrt x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :PadicNumber -- a square root of x
+  Description
+    Text
+      Returns a square root of a $p$-adic number.
+    Example
+      sqrt QQ_7 2
+      oo^2
+  Caveat
+    An error is raised if @VAR "x"@ is not a $p$-adic square.
+  SeeAlso
+    (symbol ^, PadicNumber, ZZ)
+///
+
+doc ///
+  Key
+    (exp, PadicNumber)
+  Headline
+    p-adic exponential function
+  Usage
+    exp x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :PadicNumber -- the p-adic exponential of x
+  Description
+    Text
+      Returns the $p$-adic exponential of $x$, defined by the power series
+      $\exp_p x = \sum_{n=0}^\infty x^n / n!$.  The series converges when
+      $|x|_p < p^{-1/(p-1)}$.
+    Example
+      exp QQ_7 7
+      log oo
+  Caveat
+    An error is raised if the series does not converge.
+  Subnodes
+    (log, PadicNumber)
+///
+
+doc ///
+  Key
+    (log, PadicNumber)
+  Headline
+    p-adic logarithm function
+  Usage
+    log x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :PadicNumber -- the p-adic logarithm of x
+  Description
+    Text
+      Returns the $p$-adic logarithm of $x$, defined by the power series
+      $\log_p x = \sum_{n=1}^\infty (-1)^{n-1}(x-1)^n/n$.  The series converges
+      when $|x - 1|_p < 1$.
+    Example
+      log exp QQ_7 7
+  Caveat
+    An error is raised if the series does not converge.
+  SeeAlso
+    (exp, PadicNumber)
+///
+
+doc ///
+  Key
+    pVal
+    (pVal, PadicNumber)
+  Headline
+    p-adic valuation of a p-adic number
+  Usage
+    pVal x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :ZZ
+      or @TO InfiniteNumber@ if @VAR "x"@ is zero
+  Description
+    Text
+      Returns the $p$-adic valuation $\nu_p(x)$, i.e., the exponent $\nu$ in
+      the factorization $x = u p^\nu$ where $u$ is a $p$-adic unit.
+    Example
+      pVal QQ_7 49
+      pVal QQ_7(1/7)
+      pVal QQ_7 0
+  SeeAlso
+    unit
+    (abs, PadicNumber)
+///
+
+doc ///
+  Key
+    prime
+    (prime, PadicFieldFamily)
+    (prime, PadicNumber)
+  Headline
+    prime of a p-adic field or number
+  Usage
+    prime kk
+    prime x
+  Inputs
+    kk:PadicFieldFamily
+    x:PadicNumber
+  Outputs
+    :ZZ
+  Description
+    Text
+      Returns the prime $p$ of a $p$-adic field or number.
+    Example
+      prime QQ_7
+      prime QQ_7 3
+///
+
+doc ///
+  Key
+    (symbol ==, PadicNumber, PadicNumber)
+    (symbol ==, PadicNumber, Number)
+    (symbol ==, Number, PadicNumber)
+  Headline
+    equality of p-adic numbers
+  Usage
+    x == y
+  Inputs
+    x:PadicNumber
+    y:PadicNumber
+  Outputs
+    :Boolean
+  Description
+    Text
+      Test equality of two $p$-adic numbers.  Numbers in the same field are
+      compared directly.
+    Example
+      QQ_7 3 == QQ_7 3
+      QQ_7 3 == QQ_7 4
+    Text
+      If the two numbers lie in different $p$-adic fields, or if one argument is
+      an ordinary number, equality is tested by comparing their lifts to @TO QQ@.
+    Example
+      QQ_7 3 == QQ_5 3
+      QQ_7 3 == 3
+      3 == QQ_7 3
+///
+
+doc ///
+  Key
+    teichmuller
+    (teichmuller, PadicNumber)
+  Headline
+    Teichmüller lift of a p-adic integer
+  Usage
+    teichmuller x
+  Inputs
+    x:PadicNumber
+  Outputs
+    :PadicNumber
+  Description
+    Text
+      Returns the Teichmüller lift of $x$, which is the unique root of unity
+      $t \in \ZZ_p^\times$ satisfying $t \equiv x \pmod{p}$ and $t^p = t$.
+    Example
+      t = teichmuller QQ_7 3
+      t^7 == t
+  Caveat
+    An error is raised if $\nu_p(x) < 0$, i.e., if $x$ is not a $p$-adic integer.
+///
+
+doc ///
+  Key
+    (lift, PadicNumber, ZZ)
+    (lift, PadicNumber, QQ)
+    (lift, PadicNumber, PadicNumber)
+    (symbol ^, Number, PadicFieldFamily)
+  Headline
+    lift a p-adic number to ZZ, QQ, or another p-adic field
+  Usage
+    lift(x, ZZ)
+    lift(x, QQ)
+    lift(x, kk)
+    y^kk
+  Inputs
+    x:PadicNumber
+    kk:PadicFieldFamily
+    y:Number
+  Outputs
+    :Thing
+      an element of @TO ZZ@, @TO QQ@, or a @TO PadicNumber@
+  Description
+    Text
+      Lift a $p$-adic number to an integer, a rational, or an element of another
+      $p$-adic field.
+    Example
+      x = QQ_7 49
+      lift(x, ZZ)
+      lift(x, QQ)
+    Text
+      The notation @CODE "y^kk"@, where @VAR "kk"@ is a @TO PadicFieldFamily@,
+      is shorthand for @CODE "lift(y, kk)"@.
+    Example
+      x^ZZ
+      x^QQ
+  Caveat
+    Lifting to @TO ZZ@ raises an error if the $p$-adic valuation of @VAR "x"@
+    is negative.
+  SeeAlso
+    (promote, ZZ, PadicNumber)
+///
+
+doc ///
+  Key
+    (promote, ZZ, PadicNumber)
+    (promote, QQ, PadicNumber)
+    (promote, PadicNumber, PadicNumber)
+    (symbol _, Number, PadicFieldFamily)
+  Headline
+    promote a number to a p-adic field
+  Usage
+    promote(x, kk)
+    x_kk
+  Inputs
+    x:Number
+    kk:PadicFieldFamily
+  Outputs
+    :PadicNumber
+  Description
+    Text
+      Promote an integer, rational, or $p$-adic number to the given $p$-adic
+      field.  The subscript notation @CODE "x_kk"@ may also be used.
+    Example
+      promote(3, QQ_7)
+      promote(3/2, QQ_7)
+      3_QQ_7
+      (3/2)_QQ_7
+  SeeAlso
+    (lift, PadicNumber, ZZ)
+///
+
+doc ///
+  Key
+    (numeric, PadicNumber)
+    (numeric, ZZ, PadicNumber)
+  Headline
+    convert a p-adic number to a real number
+  Usage
+    numeric x
+    numeric(prec, x)
+  Inputs
+    x:PadicNumber
+    prec:ZZ -- number of bits of precision
+  Outputs
+    :RR
+  Description
+    Text
+      Converts a $p$-adic number to a floating-point real number by first
+      lifting to @TO QQ@.
+    Example
+      numeric QQ_7 5
+      numeric(100, QQ_7 5)
+  SeeAlso
+    (interval, PadicNumber)
+    (lift, PadicNumber, ZZ)
+///
+
+doc ///
+  Key
+    (interval, PadicNumber)
+    (interval, PadicNumber, PadicNumber)
+    (interval, PadicNumber, Number)
+    (interval, Number, PadicNumber)
+  Headline
+    convert p-adic numbers to a real interval
+  Usage
+    interval x
+    interval(x, y)
+  Inputs
+    x:PadicNumber
+    y:{PadicNumber, Number}
+  Outputs
+    :RRi
+  Description
+    Text
+      Converts a $p$-adic number to a real interval by first lifting to @TO QQ@.
+      When two arguments are given, returns the interval with those endpoints.
+    Example
+      interval QQ_7 5
+      interval(QQ_7 5, QQ_7 6)
+      interval(QQ_7 5, 6)
+      interval(5, QQ_7 6)
+  SeeAlso
+    (numeric, PadicNumber)
 ///
 
 TEST ///
