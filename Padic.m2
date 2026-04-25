@@ -385,6 +385,16 @@ doc ///
   Description
     Text
       TODO
+  Citation
+    @misc{torrance2026implementingpadicnumbersmacaulay2,
+      title={Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT},
+      author={Douglas A. Torrance},
+      year={2026},
+      eprint={2604.16799},
+      archivePrefix={arXiv},
+      primaryClass={math.AG},
+      url={https://arxiv.org/abs/2604.16799},
+    }
   Subnodes
     PadicFieldFamily
     PadicNumber
