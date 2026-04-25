@@ -388,7 +388,35 @@ doc ///
     p-adic numbers
   Description
     Text
-      TODO
+      The field of $p$-adic numbers $\QQ_p$ consists of all formal
+      Laurent series
+      $$\sum_{n=\nu}^\infty a_n p^n = a_\nu p^\nu + a_{\nu+1} p^{\nu+1} + \cdots,$$
+      where $\nu \in \ZZ$ and $a_n \in \{0, \ldots, p - 1\}$, together with the
+      usual operations of addition and multiplication in base $p$, with carrying
+      that may continue indefinitely.  Equivalently, $\QQ_p$ is the completion
+      of $\QQ$ with respect to the $p$-adic absolute value $|x|_p =
+      p^{-\nu_p(x)}$, just as $\RR$ is the completion of $\QQ$ under the usual
+      absolute value.
+
+      Elements of $\QQ_p$ are created by applying @ofClass PadicFieldFamily@ to a
+      rational number.  They are stored and displayed as truncated series, with a
+      default @TO2((precision, PadicNumber), "precision")@ of 20 base-$p$ digits.
+    Example
+      x = QQ_7(12/7)
+      pVal x
+      unit x
+      abs x
+    Text
+      Every nonzero $x \in \QQ_p$ factors as $x = u p^\nu$ where
+      $\nu = \nu_p(x)$ is the @TO2(pVal, "valuation") @ and
+      $u \in \ZZ_p^\times$ is a @TO unit@.  For example, above we see
+      $12/7 = 5 \cdot 7^{-1} + 1 \cdot 7^0 = (5 + 7^1)\cdot 7^{-1} = 12\cdot 7^{-1}$,
+      so $u = 12$ and $\nu_7(12/7) = -1$.
+
+      This package is implemented using the
+      @TO "ForeignFunctions::ForeignFunctions"@ package to call $p$-adic
+      arithmetic routines from the @HREF("https://flintlib.org/", "FLINT")@
+      C library.
   Citation
     @misc{torrance2026implementingpadicnumbersmacaulay2,
       title={Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT},
