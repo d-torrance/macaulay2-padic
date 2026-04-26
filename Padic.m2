@@ -14,7 +14,7 @@ export {
     -- methods
     "prime",
     "pVal",
-    "teichmuller",
+    "teichmullerLift",
     "unit",
 
     -- classes
@@ -329,8 +329,8 @@ log PadicNumber := x -> (
     if r == 1 then QQ_(prime x)(x.context, y)
     else error(prime x, "-adic logarithm function does not converge"))
 
-teichmuller = method()
-teichmuller PadicNumber := x -> (
+teichmullerLift = method()
+teichmullerLift PadicNumber := x -> (
     if pVal x < 0 then error("expected a ", prime x, "-adic integer");
     y := newPadic precision x;
     padicTeichmuller(y, x.number, x.context);
@@ -489,7 +489,7 @@ doc ///
     (symbol <<, PadicNumber, ZZ)
     (symbol ^, PadicNumber, ZZ)
     (exp, PadicNumber)
-    teichmuller
+    teichmullerLift
     (lift, PadicNumber, ZZ)
     (promote, ZZ, PadicNumber)
     (numeric, PadicNumber)
@@ -956,12 +956,12 @@ doc ///
 
 doc ///
   Key
-    teichmuller
-    (teichmuller, PadicNumber)
+    teichmullerLift
+    (teichmullerLift, PadicNumber)
   Headline
     Teichmüller lift of a p-adic integer
   Usage
-    teichmuller x
+    teichmullerLift x
   Inputs
     x:PadicNumber
   Outputs
@@ -971,7 +971,7 @@ doc ///
       Returns the Teichmüller lift of $x$, which is the unique root of unity
       $t \in \ZZ_p^\times$ satisfying $t \equiv x \pmod{p}$ and $t^p = t$.
     Example
-      t = teichmuller QQ_7 3
+      t = teichmullerLift QQ_7 3
       t^7 == t
   Caveat
     An error is raised if $\nu_p(x) < 0$, i.e., if $x$ is not a $p$-adic integer.
@@ -1147,7 +1147,7 @@ assert Equation((sqrt QQ_7 2)^2, QQ_7 2)
 assert Equation((QQ_7 3)^2, QQ_7 9)
 assert Equation(precision(QQ_7(10, 3) + QQ_7(20, 4)), 10)
 assert Equation(log exp QQ_7 7, QQ_7 7)
-t = teichmuller QQ_7 3
+t = teichmullerLift QQ_7 3
 assert Equation(t^7 - t, 0)
 ///
 
@@ -1186,7 +1186,7 @@ checkError(() -> inverse QQ_7 0, "division by zero")
 checkError(() -> sqrt QQ_7 3, "not a 7-adic square")
 checkError(() -> exp QQ_7 3, "7-adic exponential function does not converge")
 checkError(() -> log QQ_7 3, "7-adic logarithm function does not converge")
-checkError(() -> teichmuller QQ_7(1/7), "expected a 7-adic integer")
+checkError(() -> teichmullerLift QQ_7(1/7), "expected a 7-adic integer")
 checkError(() -> lift(QQ_7(1/7), ZZ), "expected a 7-adic integer")
 ///
 
