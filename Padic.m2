@@ -10,6 +10,18 @@ newPackage("Padic",
     PackageExports => {"Valuations"},
     PackageImports => {"ForeignFunctions"})
 
+endpkg = msg -> (
+    document {Key => Padic,
+	Headline => (options currentPackage).Headline,
+	"Warning: Padic was loaded without key components."};
+    printerr("warning: ", msg, "; ending");
+    end)
+
+if not ForeignFunctions#"private dictionary"#?"foreignFunction"
+then endpkg "foreign function interface is not available"
+
+flint = try openSharedLibrary "flint" else endpkg "flint is not available"
+
 export {
     -- methods
     "prime",
@@ -28,8 +40,6 @@ protect context
 ---------------------
 -- FLINT interface --
 ---------------------
-
-flint = openSharedLibrary "flint"
 
 -- fmpz (flint integer type)
 fmpzInit = foreignFunction(flint, "fmpz_init", void, voidstar)
