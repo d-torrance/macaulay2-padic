@@ -76,9 +76,9 @@ We open with a crash course on $p$-adic numbers.  The reader is encouraged to re
 
 Suppose $p$ is a prime number.  The field of \textit{$p$-adic numbers} $\QQ_p$ is a set whose elements may be expressed uniquely as formal Laurent series
 \begin{equation}\label{p-adic expansion}
-  \sum_{n=\nu}^\infty a_n p^n = a_\nu p^\nu + a_{\nu + 1}p^{\nu + 1} + \cdots,
+  \sum_{n=k}^\infty a_n p^n = a_k p^k + a_{k + 1}p^{k + 1} + \cdots,
 \end{equation}
-where $\nu\in\ZZ$ and $a_n\in\{0,\ldots,p-1\}$, together with the usual operations of addition and multiplication in base $p$, but noting that carrying may continue indefinitely.  An enlightening exercise is to verify that $-1 = \sum\limits_{n=0}^\infty(p - 1)\cdot p^n$.
+where $k\in\ZZ$ and $a_n\in\{0,\ldots,p-1\}$, together with the usual operations of addition and multiplication in base $p$, but noting that carrying may continue indefinitely.  An enlightening exercise is to verify that $-1 = \sum\limits_{n=0}^\infty(p - 1)\cdot p^n$.
 
 
 For a given $x\in\QQ_p$, its \textit{$p$-adic valuation}, denoted $\nu_p(x)$, is the smallest nonzero exponent that appears in the expansion given in \Cref{p-adic expansion}, e.g., $\nu_3(1\cdot 3^{-2} + 2\cdot 3^{-1})=-2$.  In particular, $\nu_p(0) = \infty$.
