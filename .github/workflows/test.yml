@@ -1,0 +1,25 @@
+name: test
+on:
+  push:
+    branches: 'master'
+  schedule:
+    - cron: '0 12 15 * *'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      # TODO: enable after 1.26.06 release
+      # - name: Check that we are in sync with M2 repo
+      #   run: |
+      #     mkdir tmp
+      #     wget -P tmp https://raw.githubusercontent.com/Macaulay2/M2/refs/heads/development/M2/Macaulay2/packages/Padic.m2
+      #     diff -us Padic.m2 tmp/Padic.m2
+      - name: Install Macaulay2
+        run: |
+          sudo add-apt-repository ppa:macaulay2/macaulay2
+          sudo apt-get install -y --no-install-recommends macaulay2
+      - name: Install Padic package
+        run: M2 -q --stop -e 'installPackage "Padic"; exit 0'
+      - name: Test Padic package
+        run: M2 -q --stop -e 'check needsPackage "Padic"; exit 0'
