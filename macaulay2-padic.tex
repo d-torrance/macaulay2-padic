@@ -104,7 +104,7 @@ and for $x\in\QQ_p$ with $|x-1|_p < 1$,
   \log_p x = \sum_{n=1}^\infty\frac{(-1)^{n-1}(x-1)^n}{n}.
 \end{equation*}
 
-Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, known as the \textit{Teichm\"uller lift} of $x$, for which $x\equiv t\pmod p$ and $t^p = t$.
+Finally, for every $x\in\ZZ_p^\times$ there exists a unique $t\in\ZZ_p^\times$, known as the \textit{Teichm\"uller lift} of $x$, for which $x\equiv t\pmod p$ and $t^p = t$.  Note that $t$ depends only on the congruence class of $x$ modulo $p$.
 
 \section{$p$-adic numbers in FLINT}\label{flint p-adic module}
 
@@ -255,11 +255,16 @@ o3 : QQ  (of precision 40)
 We close with an example, showing how to use our Macaulay2 package to find roots of polynomials over $\ZZ_p$.  We first recall Hensel's lemma, a fundamental result in $p$-adic analysis.  
 
 \begin{lemma}[Hensel \cite{hensel}]
-  Suppose $f\in\ZZ_p[x]$.  If there exists $\alpha_1\in\ZZ_p$ for which $f(\alpha_1)\equiv 0\pmod p$ and $f'(\alpha_1)\not\equiv 0\pmod p$, then there exists $\alpha\in\ZZ_p$ with $\alpha\equiv \alpha_1\pmod p$ and $f(\alpha) = 0$.  Furthermore, $\alpha$ is the limit with respect to $|\cdot|_p$ of the recursive sequence given by Newton's method,
+  Suppose $f\in\ZZ_p[x]$.  If there exists $\alpha_1\in\ZZ_p$ for which $f(\alpha_1)\equiv 0\pmod p$ and $f'(\alpha_1)\not\equiv 0\pmod p$, then there exists $\alpha\in\ZZ_p$ satisfying $\alpha_1\equiv\alpha\pmod p$ and $f(\alpha)=0$.
+
+  Furthermore, $\alpha$ may be constructed by defining the recursive sequence given by Newton's method,
   \begin{equation*}
     \alpha_{n+1} = \alpha_n - \frac{f(\alpha_n)}{f'(\alpha_n)}.
   \end{equation*}
+Then $f(\alpha_n)\equiv 0\pmod{p^n}$ for all $n$ and $\alpha=\lim\limits_{n\to\infty}\alpha_n$, where the limit is taken with respect to $|\cdot|_p$.
 \end{lemma}
+
+As with the Teichm\"uller lift, any choice of $\alpha_1$ in the same congruence class modulo $p$ will work, and in particular, it is natural to choose $\alpha_1\in\{0,\ldots,p-1\}$ so that $\alpha = \alpha_1\cdot p^0 + \cdots$ (see \Cref{p-adic expansion}).
 
 We would like to use Macaulay2 to compute the cube root of 2 in $\ZZ_5$ by finding a root of $x^3-2\in\ZZ_5[x]$.  Since $3^3-2=25\equiv 0\pmod 5$ and $3\cdot 3^2 = 27\not\equiv 0\pmod 5$, we begin with $\alpha_1 = 3$.  We then iterate Newton's method until it converges (up to the $5^{19}$ term, as FLINT's default precision for $p$-adics is $N=20$).  See \Cref{hensel lemma example code}.
 
