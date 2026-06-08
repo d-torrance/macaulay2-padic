@@ -121,7 +121,7 @@ FLINT uses two main types in its $p$-adic number module.  A \texttt{padic\_t} ob
 
 A variety of functions exist for performing operations on $p$-adic numbers in FLINT.  See \Cref{flint p-adic functions} for a selection.
 
-\begin{table}[h]
+\begin{table}[htbp!]
   \centering
   \begin{tabular}{|c|c|}
     \hline
@@ -156,7 +156,7 @@ Macaulay2 uses the Boehm-Demers-Weiser conservative garbage collector \cite{bdwg
 
 Therefore, after allocating the memory for a FLINT object and calling the corresponding initialization function, we must register a finalizer so that when the garbage is collected and the memory is freed, the appropriate FLINT function is also called. See \Cref{garbage collection example}.  Note that when allocating memory for a \texttt{padic\_t} object, we are allocating memory for a struct that fits three \texttt{long} integers -- $u$, $\nu$, and $N$ from \Cref{p-adic with precision}.\footnote{Actually, $u$ is a \texttt{fmpz\_t} object, which is either a \texttt{long} integer or, if needed, a pointer to an arbitrary precision integer.}
 
-\begin{listing}[h]
+\begin{listing}[htbp!]
   \begin{minted}[frame=lines,framesep=1ex]{macaulay2}
 needsPackage "ForeignFunctions"
 flint = openSharedLibrary "flint"
@@ -178,7 +178,7 @@ Because of the similarities with the real and complex fields in that we are deal
 
 To parallel this, for a given prime number \texttt{p}, we let the class \texttt{QQ\_p} be an instance of \texttt{PadicFieldFamily} and a subclass of \texttt{PadicNumber}.  See the class diagrams in \Cref{type class diagram} and \Cref{object class diagram}.
 
-\begin{figure}[h]
+\begin{figure}[htbp!]
   \centering
   \begin{tikzpicture}
     \umlemptyclass[y=4]{Type}
@@ -194,7 +194,7 @@ To parallel this, for a given prime number \texttt{p}, we let the class \texttt{
 \end{figure}
 
 
-\begin{figure}[h]
+\begin{figure}[htbp!]
   \centering
   \begin{tikzpicture}
     \umlemptyclass[x=1,y=4]{Number}
@@ -233,7 +233,7 @@ We close with an example, showing how to use our Macaulay2 package to find roots
 
 We would like to use Macaulay2 to compute the cube root of 2 in $\ZZ_5$ by finding a root of $x^3-2\in\ZZ_5[x]$.  Since $3^3-2=25\equiv 0\pmod 5$ and $3\cdot 3^2 = 27\not\equiv 0\pmod 5$, we begin with $\alpha_1 = 3$.  We then iterate Newton's method until it converges (up to the $5^{19}$ term, as FLINT's default precision for $p$-adics is $N=20$).  See \Cref{hensel lemma example code}.
 
-\begin{listing}[h]
+\begin{listing}[htbp!]
 \begin{minted}[frame=lines,framesep=1ex]{macaulay2}
 i1 : needsPackage "Padic";
 
