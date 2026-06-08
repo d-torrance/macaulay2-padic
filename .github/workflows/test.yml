@@ -18,7 +18,7 @@ jobs:
       - name: Install Macaulay2
         run: |
           sudo add-apt-repository ppa:macaulay2/macaulay2
-          sudo apt-get install -y --no-install-recommends macaulay2
+          sudo apt-get install -y --no-install-recommends macaulay2 libflint-dev
       - name: Install Padic package
         run: M2 -q --stop -e 'installPackage "Padic"; exit 0'
       - name: Test Padic package
