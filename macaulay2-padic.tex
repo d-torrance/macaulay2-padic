@@ -220,6 +220,36 @@ To parallel this, for a given prime number \texttt{p}, we let the class \texttt{
 
 Instances of \texttt{QQ\_p} are hash tables containing pointers to the corresponding \texttt{padic\_t} and \texttt{padic\_ctx\_t} objects.  The latter are memoized to avoid duplication.  Then methods are installed on \texttt{PadicNumber} wrapping each of the foreign functions from FLINT, e.g., \texttt{PadicNumber + PadicNumber} calls \texttt{padic\_add}.
 
+The constructor methods for these classes either take a single Macaulay2 number, returning a $p$-adic number with the default precision of 20, or optionally an integer first argument to indicate the precision.  See \Cref{constructor methods}.
+
+\begin{listing}[htbp!]
+\begin{minted}[frame=lines,framesep=1ex]{macaulay2}
+i1 : needsPackage "Padic";
+
+i2 : QQ_5(-1)
+
+o2 = 4 + 4*5^1 + 4*5^2 + 4*5^3 + 4*5^4 + 4*5^5 + 4*5^6 + 4*5^7 + 4*5^8
+     + 4*5^9 + 4*5^10 + 4*5^11 + 4*5^12 + 4*5^13 + 4*5^14 + 4*5^15 +
+     4*5^16 + 4*5^17 + 4*5^18 + 4*5^19
+
+o2 : QQ  (of precision 20)
+       5
+
+i3 : QQ_5(40, -1)
+
+o3 = 4 + 4*5^1 + 4*5^2 + 4*5^3 + 4*5^4 + 4*5^5 + 4*5^6 + 4*5^7 + 4*5^8
+     + 4*5^9 + 4*5^10 + 4*5^11 + 4*5^12 + 4*5^13 + 4*5^14 + 4*5^15 +
+     4*5^16 + 4*5^17 + 4*5^18 + 4*5^19 + 4*5^20 + 4*5^21 + 4*5^22 +
+     4*5^23 + 4*5^24 + 4*5^25 + 4*5^26 + 4*5^27 + 4*5^28 + 4*5^29 +
+     4*5^30 + 4*5^31 + 4*5^32 + 4*5^33 + 4*5^34 + 4*5^35 + 4*5^36 +
+     4*5^37 + 4*5^38 + 4*5^39
+
+o3 : QQ  (of precision 40)
+       5
+\end{minted}
+\caption{Constructing $-1\in\QQ_5$ with different precisions}
+\label{constructor methods}
+\end{listing}
 \section{Example: Hensel's lemma}\label{hensel example}
 
 We close with an example, showing how to use our Macaulay2 package to find roots of polynomials over $\ZZ_p$.  We first recall Hensel's lemma, a fundamental result in $p$-adic analysis.  
