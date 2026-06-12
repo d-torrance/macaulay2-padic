@@ -22,3 +22,32 @@ jobs:
         run: M2 -q --stop -e 'installPackage "Padic"; exit 0'
       - name: Test Padic package
         run: M2 -q --stop -e 'check needsPackage "Padic"; exit 0'
+      - name: Build documentation site
+        run: |
+          mkdir site
+          cp -rL ~/.Macaulay2/local/share/doc/Macaulay2/Padic/html/. site
+          cp -rL /usr/share/Macaulay2/Style site/Style
+          sed -i \
+            -e 's,/usr/share/Macaulay2/Style,Style,g' \
+            -e 's,/usr/share/doc/Macaulay2,https://www.macaulay2.com/doc/Macaulay2/share/doc/Macaulay2,g' \
+            site/*.html
+          touch site/.nojekyll
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
