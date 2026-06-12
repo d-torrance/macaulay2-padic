@@ -9,12 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      # TODO: enable after 1.26.06 release
-      # - name: Check that we are in sync with M2 repo
-      #   run: |
-      #     mkdir tmp
-      #     wget -P tmp https://raw.githubusercontent.com/Macaulay2/M2/refs/heads/development/M2/Macaulay2/packages/Padic.m2
-      #     diff -us Padic.m2 tmp/Padic.m2
+      - name: Check that we are in sync with M2 repo
+        run: |
+          mkdir tmp
+          wget -P tmp https://raw.githubusercontent.com/Macaulay2/M2/refs/heads/development/M2/Macaulay2/packages/Padic.m2
+          diff -us Padic.m2 tmp/Padic.m2
       - name: Install Macaulay2
         run: |
           sudo add-apt-repository ppa:macaulay2/macaulay2
