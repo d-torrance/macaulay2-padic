@@ -1,0 +1,21 @@
+.reveal .slides {
+    text-align: left;
+}
+.reveal .slides section>* {
+    margin-left: 0;
+    margin-right: 0;
+}
+.reveal h2 {
+    text-transform: none;
+}
+.addition-stack {
+    position: relative;
+    display: inline-block;
+    text-align: left;
+    min-height: 6.5em; /* reserve space so the layout doesn't jump */
+}
+.addition-step {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

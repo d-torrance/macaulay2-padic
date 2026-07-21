@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+	  <h2>Implementing p-adic numbers in Macaulay2 using its foreign function interface and FLINT</h2>
+	  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+	    <div style="text-align: left;">
+	      Douglas A. Torrance<br>
+              Georgia Tech<br>
+              ICMS 2026<br>
+	    </div>
+	    <div style="display: flex; gap: 20px; align-items: center;">
+	      <img src="img/georgia-tech.png" height="150px">
+	      <img src="img/simons.png" height="150px">
+	    </div>
+	  </div>
+
+	</section>
+
+	<section>
+	  <h2>What is Macaulay2?</h2>
+
+	  <p>Macaulay2 is a computer algebra system for research in algebraic geometry and commutative algebra.</p>
+
+	  <p>It supports computations in a wide variety of rings:<p>
+
+	    <ul>
+	      <li> $\mathbb Z$, $\mathbb Q$, $\mathbb R$, $\mathbb C$, $\mathbb F_{p^k}$</li>
+	      <li> polynomial rings </li>
+	      <li> quotient rings </li>
+	      <li> local rings, fraction fields </li>
+	    </ul>
+	</section>
+
+	<section>
+
+	  <h2>What's missing?</h2>
+
+	  The <em>$p$-adics</em> $\mathbb Q_p$ (prime $p$)
+
+	  $$\sum_{n=k}^\infty a_n p^n = a_k p^k + a_{k + 1}p^{k + 1} + \cdots$$
+
+	  $$a_n\in\{0,\ldots,p-1\}$$
+
+	</section>
+
+	<section>
+	  <h2>Arithmetic</h2>
+	  <p>
+	    Addition and multiplication are defined in the usual way in base $p$, but carrying may continue indefinitely.
+	  </p>
+
+  <div class="addition-stack">
+
+    <!-- State 0: the starting problem, visible immediately,
+         fades out on the first click -->
+    <div class="addition-step fragment fade-out" data-fragment-index="0">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 \\
+        \hline
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 1: 7 appears at the 7^0 place, flagged in red -->
+    <div class="addition-step fragment fade-in-then-out" data-fragment-index="0">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 \\
+        \hline
+        &\textcolor{#d1495b}{7\cdot7^0}
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 2: carry resolved -- 0 at 7^0, +1*7^1 added to the addend -->
+    <div class="addition-step fragment fade-in-then-out" data-fragment-index="1">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 \textcolor{#859900}{+ 1\cdot7^1} \\
+        \hline
+        &\textcolor{#859900}{0\cdot7^0}
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 3: 7 appears at the 7^1 place -->
+    <div class="addition-step fragment fade-in-then-out" data-fragment-index="2">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 + 1\cdot7^1 \\
+        \hline
+        &0\cdot7^0 + \textcolor{#d1495b}{7\cdot7^1}
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 4: carry resolved again -->
+    <div class="addition-step fragment fade-in-then-out" data-fragment-index="3">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 + 1\cdot7^1 \textcolor{#859900}{+ 1\cdot7^2} \\
+        \hline
+        &0\cdot7^0 \textcolor{#859900}{+ 0\cdot7^1}
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 5: one more round, to establish the pattern -->
+    <div class="addition-step fragment fade-in-then-out" data-fragment-index="4">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 + 1\cdot7^1 + 1\cdot7^2 \\
+        \hline
+      &0\cdot7^0 + 0\cdot7^1 + \textcolor{#d1495b}{7\cdot7^2}
+      \end{array}
+      \]
+    </div>
+
+    <!-- State 6: the pattern continues forever -- everything carries
+         away to zero, and it stays on screen -->
+    <div class="addition-step fragment" data-fragment-index="5">
+      \[
+      \begin{array}{rl}
+        &6\cdot7^0 + 6\cdot7^1 + 6\cdot7^2 + \cdots \\
+        +&1\cdot7^0 + 1\cdot7^1 + 1\cdot7^2 + \cdots \\
+        \hline
+        &0\cdot7^0 + 0\cdot7^1 + 0\cdot7^2 + \cdots
+      \end{array}
+      \]
+
+      <p>
+	$\implies$ in $\mathbb Q_7$,
+	$$-1 = 6\cdot 7^0 + 6\cdot 7^1 + 6\cdot 7^2 + \cdots$$
+      </p>
+    </div>
+  </div>
+	</section>
+
+	<section>
+	  <h2>p-adic valuation</h2>
+
+<p>If $x\in\mathbb Q_p$, then $\nu_p(x)$ is the smallest exponent with a nonzero coefficient in the this expansion.</p>
+
+<p>e.g., $\nu_7(-1) = 0$.</p>
+
+	</section>
+
+	<section>
+	  <h2>p-adic absolute value</h2>
+
+	  If $x\in\mathbb Q_p$, then
+
+	  $$|x|_p = p^{-\nu_p(x)}$$
+
+	  $\mathbb Q_p$ is the completion of $\mathbb Q$ under $|\cdot|_p$ just as $\mathbb R$ is the completion of $\mathbb Q$ under the usual absolute value $|\cdot|$.
+
+	</section>
+
+	<section>
+	  <h2>p-adic integers</h2>
+
+<p>$\mathbb Z_p = \{x\in\mathbb Q_p:\nu_p(x) \geq 0\}$ is a ring.</p>
+
+<p>Its units are $\mathbb Z_p^\times = \{x\in\mathbb Q_p:\nu_p(x) = 0\}.$
+
+
+	</section>
+
+	<section>
+	  <h2>Representing p-adics</h2>
+
+	  If $x\in\mathbb Q_p$ is nonzero with $\nu_p(x)=k$, then
+
+	  $$x = \sum_{n=k}^\infty a_n p^n = \left(\sum_{n=0}^\infty a_{n+k}p^n\right)p^k = up^k$$
+
+	  Note: $u\in\mathbb Z_p^\times$
+	</section>
+
+	<section>
+	  <h2>Precision</h2>
+
+	  Just like $\mathbb R$, we can't hope to store all the digits of an element of $\mathbb Q_p$ in a computer.
+
+	  So we choose some <em>precision</em> $N$ and restrict to $x = up^k$ with
+
+	  $$u = \sum_{n=0}^{N-1}a_{n+k}p^n$$
+
+	  $\implies$ Represent $x$ using $u,p,k,N\in\mathbb Z$
+	</section>
+
+	<section>
+	  <h2>FLINT</h2>
+
+	  <p>FLINT (<b>F</b>ast <b>Li</b>brary for <b>N</b>umber <b>T</b>heory) is a C library that Macaulay2 already links against.  It implements $p$-adics using:</p>
+
+	  <ul>
+	    <li> <code>padic_t</code>: $u$ (<code>fmpz_t</code>), $k$, $N$ (<code>long</code>)</li>
+	    <li> <code>padic_ctx_t</code>: $p$ (<code>fmpz_t</code>)</li>
+	  </ul>
+
+	  <p><em>Note:</em> New $p$-adic implementation in FLINT 3.6.0 (released June 29)</p>
+	</section>
+
+	<section>
+	  <pre><code class="language-macaulay2">
+	      R = QQ[x,y,z,w]
+	      I = monomialCurveIdeal(R, {1,2,3})
+	  </code></pre>
+        </section>
+
+
+	<section>
+	  <h2>Thank you!</h2>
+	</section>
+
+      </div>
+    </div>
+    <script src="js/reveal.js"></script>
+  </body>
+</html>
