@@ -73,6 +73,12 @@ export {
 -- unexported symbols
 protect context
 
+-- belongs in ForeignFunctions
+foreignFunction(Nothing, String, ForeignType, ForeignType) := o -> (
+    nothing, symb, rtype, argtype) -> foreignFunction(symb, rtype, argtype, o)
+foreignFunction(Nothing, String, ForeignType, VisibleList) := o -> (
+    nothing, symb, rtype, argtypes) -> foreignFunction(symb, rtype, argtypes, o)
+
 ---------------------
 -- FLINT interface --
 ---------------------
