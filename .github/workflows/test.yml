@@ -32,6 +32,13 @@ jobs:
             -e 's,/usr/share/doc/Macaulay2,https://www.macaulay2.com/doc/Macaulay2/share/doc/Macaulay2,g' \
             site/*.html
           touch site/.nojekyll
+      - name: Build ICMS slides
+        run: |
+          cd icms
+          npm ci
+          npm run build
+          mkdir ../site/icms
+          cp index.html fonts img js ../site/icms
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
