@@ -38,7 +38,7 @@ jobs:
           npm ci
           npm run build
           mkdir ../site/icms
-          cp index.html fonts img js ../site/icms
+          cp -r index.html fonts img js ../site/icms
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
