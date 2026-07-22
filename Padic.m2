@@ -216,7 +216,6 @@ PadicFieldFamily.synonym = "p-adic field family"
 expression PadicFieldFamily := kk -> Subscript(QQ, prime kk)
 net PadicFieldFamily := net @@ expression
 toString PadicFieldFamily := toString @@ expression
-texMath PadicFieldFamily := texMath @@ expression
 
 PadicNumber = new Type of Number
 PadicNumber.synonym = "p-adic number"
@@ -499,7 +498,6 @@ undocumented {
     (net, PadicFieldFamily),
     (toString, PadicFieldFamily),
     (toString, PadicNumber),
-    (texMath, PadicFieldFamily),
     (peek', ZZ, PadicNumber),
     (describe, PadicNumber)}
 
