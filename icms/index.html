@@ -152,7 +152,7 @@
 	<section>
 	  <h2>p-adic valuation</h2>
 
-<p>If $x\in\mathbb Q_p$, then $\nu_p(x)$ is the smallest exponent with a nonzero coefficient in the this expansion.</p>
+<p>If $x\in\mathbb Q_p$, then $\nu_p(x)$ is the smallest exponent with a nonzero coefficient in this expansion.</p>
 
 <p>e.g., $\nu_7(-1) = 0$.</p>
 
@@ -211,19 +211,70 @@
 	    <li> <code>padic_ctx_t</code>: $p$ (<code>fmpz_t</code>)</li>
 	  </ul>
 
-	  <p><em>Note:</em> New $p$-adic implementation in FLINT 3.6.0 (released June 29)</p>
+	  <p><em>Note:</em> New alternate $p$-adic implementation in FLINT 3.6.0 (released June 29) &mdash; not yet supported in M2</p>
 	</section>
 
 	<section>
-	  <pre><code class="language-macaulay2">
-	      R = QQ[x,y,z,w]
-	      I = monomialCurveIdeal(R, {1,2,3})
-	  </code></pre>
-        </section>
+	  <h2>Connecting FLINT w/ Macaulay2</h2>
+	  <p><em>Now:</em>  Using the <em>ForeignFunctions</em> package (libffi), we can call the FLINT $p$-adic functions without recompiling Macaulay2.  (con: no matrices or polynomials)</p>
+
+	  <p><em>TODO:</em> Add FLINT $p$-adic support to the Macaulay2 engine to get matrices and polynomials working.</p>
+
+	</section>
+
+	<section>
+	  <h2>Memory allocation</h2>
+	  Macaulay2 uses the Boehm-Demer-Weiser garbage collector and FLINT has its own functions for memory allocation and deallocation.
+
+	  <pre><code class="lang-macaulay2">needsPackage "ForeignFunctions"
+flint = openSharedLibrary "flint"
+padicInit = foreignFunction(flint, "padic_init", void, voidstar)
+padicClear = foreignFunction(flint, "padic_clear", void, voidstar)
+y = getMemory(3 * size long)
+padicInit y
+registerFinalizer(y, padicClear)
+</code></pre>
+
+	</section>
+
+	<section>
+	  <h2>Object-oriented design</h2>
+
+	  <p>
+	    Real and complex numbers are instances of <code>RR</code> and <code>CC</code>, resp., which are instances of <code>InexactFieldFamily</code>.  We mimic this for $p$-adics.
+	  </p>
+
+	  <img src="img/class-diagram-types.png" height="250px">
+	  <img src="img/class-diagram-objects.png" height="250px">
+
+	</section>
+
+	<section>
+	  <h2>TODO: PadicField</h2>
+
+	  <pre><code class="language-macaulay2">i1 : class 2.0
+
+o1 = RR
+
+o1 : InexactFieldFamily
+
+i2 : ring 2.0
+
+o2 = RR
+       53
+
+o2 : RealField
+</code></pre>
+
+	  <p>There is no precision-based <code>Ring</code> type yet for $p$-adics since they are not supported in the engine.</p>
+
+	</section>
 
 
 	<section>
-	  <h2>Thank you!</h2>
+	  <h2>Code demo</h2>
+
+	  To Jupyter!
 	</section>
 
       </div>
