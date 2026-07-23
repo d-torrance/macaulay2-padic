@@ -260,11 +260,10 @@ expression PadicNumber := x -> (
     s := toString x;
     Sum apply(separate(" \\+ ", s), term -> (
             factors := separate("\\*", term);
-            if #factors == 1 then factors#0
+            if #factors == 1 then value factors#0
             else if #factors == 2
             then Product(
-                factors#0,
-                -- need "value" so multiplication operator is printed
+                value factors#0,
                 Power(value \ separate("\\^", factors#1))))))
 texMath PadicNumber := texMath @@ expression
 mathML PadicNumber := mathML @@ expression
